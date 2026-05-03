@@ -1,6 +1,6 @@
 {
   "name": "deepseek-browser-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI coding agent powered by DeepSeek via browser automation — no API key needed",
   "main": "src/index.js",
   "bin": {
