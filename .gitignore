@@ -1,0 +1,45 @@
+# ── Dependencies ──────────────────────────────
+node_modules/
+
+# ── Session data (browser cookies / login) ────
+session/
+.deepseek-session/
+
+# ── Logs ──────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ── Local config overrides ────────────────────
+deepseek-agent.config.json
+
+# ── npm publish artifacts ─────────────────────
+*.tgz
+
+# ── OS files ──────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Environment ───────────────────────────────
+.env
+.env.local
+.env.*
+
+# ── Debug screenshots (from --calibrate) ──────
+*.png
+/tmp/
+
+# ── Build / dist (if added later) ─────────────
+dist/
+build/
+out/
