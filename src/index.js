@@ -7,6 +7,7 @@ const fs           = require('fs');
 const config       = require('./config');
 const logger       = require('./logger');
 const DeepSeekAgent = require('./agent');
+const { Errors, displayError } = require('./errors');
 
 // ─────────────────────────────────────────────
 //  Parse CLI arguments
@@ -132,7 +133,7 @@ async function main() {
   if (opts.workingDir) {
     const resolved = path.resolve(opts.workingDir);
     if (!fs.existsSync(resolved)) {
-      logger.error(`Working directory not found: ${resolved}`);
+      displayError(Errors.workingDirNotFound(resolved));
       process.exit(1);
     }
     config.WORKING_DIR = resolved;
@@ -159,12 +160,12 @@ async function main() {
   process.on('SIGINT',  () => shutdown(0));
   process.on('SIGTERM', () => shutdown(0));
   process.on('uncaughtException', async err => {
-    logger.error(`Uncaught error: ${err.message}`);
+    displayError(err);
     if (config.DEBUG) console.error(err.stack);
     await shutdown(1);
   });
   process.on('unhandledRejection', async reason => {
-    logger.error(`Unhandled rejection: ${reason}`);
+    displayError(reason instanceof Error ? reason : new Error(String(reason)));
     if (config.DEBUG) console.error(reason);
     await shutdown(1);
   });
@@ -189,7 +190,7 @@ async function main() {
   try {
     await agent.init();
   } catch (err) {
-    logger.error(`Failed to launch browser: ${err.message}`);
+    displayError(Errors.browserLaunchFailed(err));
     if (config.DEBUG) console.error(err.stack);
     process.exit(1);
   }
@@ -202,7 +203,7 @@ async function main() {
       await agent.run(opts.task);
     }
   } catch (err) {
-    logger.error(`Agent error: ${err.message}`);
+    displayError(err);
     if (config.DEBUG) console.error(err.stack);
     await shutdown(1);
   }

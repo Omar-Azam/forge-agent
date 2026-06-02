@@ -1,0 +1,60 @@
+# .github/workflows/release.yml
+# Triggered when you push a version tag (e.g. v1.2.0).
+# Runs tests, then publishes to npm automatically.
+#
+# Setup (one time):
+#   1. Go to your npm account → Access Tokens → Generate Granular Token
+#   2. Set Packages permission to "Read and write"
+#   3. Go to GitHub repo → Settings → Secrets → Actions
+#   4. Add secret: NPM_TOKEN = your npm token
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'         # matches v1.0.0, v1.2.3-beta, etc.
+
+jobs:
+  release:
+    name: Test & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          SKIP_PLAYWRIGHT_INSTALL: '1'
+
+      - name: Run tests before publishing
+        run: npm test
+        env:
+          CI: 'true'
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ```bash
+            npm install -g deepseek-browser-agent@${{ github.ref_name }}
+            ```
+
+            See [CHANGELOG.md](./CHANGELOG.md) for what changed in this release.

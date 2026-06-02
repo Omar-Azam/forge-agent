@@ -21,6 +21,9 @@ const defaults = {
   MAX_ITERATIONS   : 40,
   WORKING_DIR      : process.cwd(),
 
+  // Security
+  STRICT_SANDBOX   : false,    // true = block ALL file access outside WORKING_DIR
+
   // Output
   MAX_OUTPUT_LENGTH : 8_000,
   DEBUG             : false,

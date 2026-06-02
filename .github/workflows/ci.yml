@@ -1,0 +1,60 @@
+# .github/workflows/ci.yml
+# Runs on every push and pull request.
+# Tests across Node 18, 20, and 22 on Ubuntu.
+
+name: CI
+
+on:
+  push:
+    branches: [ main, dev, 'feature/**', 'fix/**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false           # run all matrix jobs even if one fails
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      # ── Checkout ───────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Node.js setup ──────────────────────────────────────────────────────
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # ── Install dependencies ───────────────────────────────────────────────
+      # SKIP_PLAYWRIGHT_INSTALL=1 prevents postinstall from downloading
+      # Chromium (~150 MB) — we don't need a real browser for unit tests.
+      - name: Install dependencies
+        run: npm ci
+        env:
+          SKIP_PLAYWRIGHT_INSTALL: '1'
+
+      # ── Lint ───────────────────────────────────────────────────────────────
+      - name: Check for syntax errors
+        run: node --check src/index.js src/agent.js src/browser.js src/tools.js src/parser.js src/prompt.js src/config.js src/logger.js
+
+      # ── Tests ──────────────────────────────────────────────────────────────
+      - name: Run test suite
+        run: npm test
+        env:
+          CI: 'true'
+
+      # ── Coverage ───────────────────────────────────────────────────────────
+      - name: Upload coverage report
+        if: matrix.node-version == 20    # only upload once
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

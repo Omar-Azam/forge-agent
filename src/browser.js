@@ -5,6 +5,9 @@ const { chromium } = require('playwright');
 const path         = require('path');
 const config       = require('./config');
 const logger       = require('./logger');
+const { Errors }   = require('./errors');
+const { withBrowserRetry, withSendRetry, withResponseRetry, sleep } = require('./retry');
+const { runHealthCheckWithReAuth } = require('./health');
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Selector banks — ordered by likelihood, with fallbacks
@@ -106,7 +109,12 @@ class DeepSeekBrowser {
     });
 
     await this._navigate(config.DEEPSEEK_URL);
-    await this._ensureLoggedIn();
+
+    // Run full session health check — handles login re-auth automatically
+    await runHealthCheckWithReAuth(this.page, async () => {
+      this._printLoginBanner();
+      await this._waitForEnter();
+    });
 
     logger.success('Browser ready!');
   }
@@ -211,44 +219,39 @@ class DeepSeekBrowser {
   // ── Sending Messages ───────────────────────────────────────────────────────
 
   async sendMessage(text) {
-    // Find input element
-    const { el, isTextarea } = await this._findInput();
+    await withSendRetry(async () => {
+      // Find input element
+      const { el, isTextarea } = await this._findInput();
 
-    // Click to focus
-    await el.click({ force: true });
-    await this.page.waitForTimeout(200);
+      // Click to focus
+      await el.click({ force: true });
+      await this.page.waitForTimeout(200);
 
-    // Clear existing content
-    await this.page.keyboard.press('Control+a');
-    await this.page.waitForTimeout(100);
+      // Clear existing content
+      await this.page.keyboard.press('Control+a');
+      await this.page.waitForTimeout(100);
 
-    if (isTextarea) {
-      // Standard textarea — use fill() which is reliable
-      await el.fill(text);
-    } else {
-      // contenteditable div — needs execCommand
-      await this.page.evaluate((element, content) => {
-        element.focus();
-        // Select all and delete
-        document.execCommand('selectAll', false, null);
-        document.execCommand('delete',    false, null);
-        // Insert text (fires proper input events)
-        document.execCommand('insertText', false, content);
-        // Belt-and-suspenders: fire input event manually
-        element.dispatchEvent(new InputEvent('input', { bubbles: true, data: content }));
-      }, el, text);
-    }
+      if (isTextarea) {
+        await el.fill(text);
+      } else {
+        await this.page.evaluate((element, content) => {
+          element.focus();
+          document.execCommand('selectAll', false, null);
+          document.execCommand('delete',    false, null);
+          document.execCommand('insertText', false, content);
+          element.dispatchEvent(new InputEvent('input', { bubbles: true, data: content }));
+        }, el, text);
+      }
 
-    await this.page.waitForTimeout(config.SEND_DELAY);
+      await this.page.waitForTimeout(config.SEND_DELAY);
 
-    // Try send button, fall back to Enter
-    const clicked = await this._clickSendButton();
-    if (!clicked) {
-      // DeepSeek uses plain Enter to submit (Shift+Enter for newlines)
-      await this.page.keyboard.press('Enter');
-    }
+      const clicked = await this._clickSendButton();
+      if (!clicked) {
+        await this.page.keyboard.press('Enter');
+      }
 
-    await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(500);
+    }, 'send message to DeepSeek');
   }
 
   async _findInput() {
@@ -261,12 +264,7 @@ class DeepSeekBrowser {
         return { el, isTextarea: tagName === 'textarea' && !isContentEditable };
       } catch {}
     }
-    throw new Error(
-      'Cannot find the DeepSeek chat input box.\n' +
-      '  → Make sure the page is fully loaded and you are logged in.\n' +
-      '  → Run with --debug to inspect DOM selectors.\n' +
-      '  → Run: node src/calibrate.js to auto-detect selectors.'
-    );
+    throw Errors.inputNotFound();
   }
 
   async _clickSendButton() {
@@ -295,52 +293,61 @@ class DeepSeekBrowser {
    *     no stop/loading indicator is visible → done.
    */
   async waitForResponse() {
-    const timeout     = config.RESPONSE_TIMEOUT;
-    const stableDelay = config.STABLE_DELAY;
-    const start       = Date.now();
+    return withResponseRetry(async () => {
+      const timeout     = config.RESPONSE_TIMEOUT;
+      const stableDelay = config.STABLE_DELAY;
+      const start       = Date.now();
 
-    // ── Phase 1: wait for a new message to appear ──────────────────────────
-    const initialCount = await this._getMessageCount();
-    let   appeared     = false;
+      // ── Phase 1: wait for a new message to appear ────────────────────────
+      const initialCount = await this._getMessageCount();
+      let   appeared     = false;
 
-    while (Date.now() - start < 12_000) {
-      const count = await this._getMessageCount();
-      if (count > initialCount) { appeared = true; break; }
-      await this.page.waitForTimeout(400);
-    }
-
-    if (!appeared) logger.warn('Response may have been delayed — continuing to wait...');
-
-    // ── Phase 2: wait for text to stabilise ───────────────────────────────
-    let lastText    = '';
-    let stableStart = null;
-    let dotCount    = 0;
-
-    while (Date.now() - start < timeout) {
-      const text = await this._extractLastMessage();
-
-      if (text !== lastText) {
-        lastText    = text;
-        stableStart = null;
-      } else if (text.length > 0) {
-        if (!stableStart) stableStart = Date.now();
-        else if (Date.now() - stableStart >= stableDelay) {
-          if (!await this._isGenerating()) break;  // confirmed done
-          stableStart = null;                       // still generating, reset
-        }
+      while (Date.now() - start < 12_000) {
+        const count = await this._getMessageCount();
+        if (count > initialCount) { appeared = true; break; }
+        await this.page.waitForTimeout(400);
       }
 
-      // Progress indicator
-      dotCount = (dotCount + 1) % 4;
-      logger.thinking(`Receiving response${'.'.repeat(dotCount)}  (${text.length} chars)`);
+      if (!appeared) logger.warn('Response may have been delayed — continuing to wait...');
 
-      await this.page.waitForTimeout(500);
-    }
+      // ── Phase 2: wait for text to stabilise ─────────────────────────────
+      let lastText    = '';
+      let stableStart = null;
+      let dotCount    = 0;
 
-    logger.clearLine();
+      while (Date.now() - start < timeout) {
+        const text = await this._extractLastMessage();
 
-    const final = await this._extractLastMessage();
-    return this._cleanText(final);
+        if (text !== lastText) {
+          lastText    = text;
+          stableStart = null;
+        } else if (text.length > 0) {
+          if (!stableStart) stableStart = Date.now();
+          else if (Date.now() - stableStart >= stableDelay) {
+            if (!await this._isGenerating()) break;
+            stableStart = null;
+          }
+        }
+
+        dotCount = (dotCount + 1) % 4;
+        logger.thinking(`Receiving response${'.'.repeat(dotCount)}  (${text.length} chars)`);
+        await this.page.waitForTimeout(500);
+      }
+
+      logger.clearLine();
+
+      const final = await this._extractLastMessage();
+      const cleaned = this._cleanText(final);
+
+      // Throw retryable error if empty so withResponseRetry kicks in
+      if (!cleaned || cleaned.trim().length === 0) {
+        const err = new Error('Empty response from DeepSeek');
+        err.retryable = true;
+        throw err;
+      }
+
+      return cleaned;
+    }, 'wait for DeepSeek response');
   }
 
   // ── DOM Extraction ─────────────────────────────────────────────────────────
@@ -523,8 +530,8 @@ class DeepSeekBrowser {
       .replace(/<think>[\s\S]*?<\/think>\n?/gi, '')
       // Strip "Thinking..." headers that sometimes prefix responses
       .replace(/^Thinking\.{0,3}\n[\s\S]*?\n\n/m, '')
-      // Strip copy-code button artifacts like "1CopyRunInsert"
-      .replace(/^\d+(?:Copy|Run|Insert|Edit)\b.*$/gm, '')
+      // Strip copy-code button artifacts e.g. "1CopyRunInsert", "2Copy", "3Run"
+      .replace(/^\d+(?:Copy|Run|Insert|Edit)\w*.*$/gm, '')
       // Collapse 3+ blank lines into 2
       .replace(/\n{3,}/g, '\n\n')
       .trim();

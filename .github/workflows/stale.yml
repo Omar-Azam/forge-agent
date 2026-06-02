@@ -1,0 +1,33 @@
+# .github/workflows/stale.yml
+# Labels issues/PRs as stale after 30 days of inactivity,
+# then closes them after 7 more days with no response.
+
+name: Stale
+
+on:
+  schedule:
+    - cron: '0 0 * * *'     # runs daily at midnight UTC
+  workflow_dispatch:          # allow manual trigger
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: >
+            This issue has been inactive for 30 days. It will be closed in 7 days
+            unless there is new activity. If this is still relevant, please leave a comment.
+          stale-pr-message: >
+            This pull request has been inactive for 30 days. It will be closed in 7 days
+            unless there is new activity. Please rebase and update if you'd like it reviewed.
+          close-issue-message: >
+            Closed due to inactivity. Feel free to reopen if this becomes relevant again.
+          close-pr-message: >
+            Closed due to inactivity. Please reopen and rebase if you'd like this reviewed.
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          exempt-issue-labels: 'pinned,security,bug'
+          exempt-pr-labels: 'pinned,security'

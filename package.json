@@ -1,6 +1,6 @@
 {
   "name": "deepseek-browser-agent",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "AI coding agent powered by DeepSeek via browser automation — no API key needed",
   "main": "src/index.js",
   "bin": {
@@ -11,7 +11,28 @@
     "start": "node src/index.js",
     "postinstall": "node src/postinstall.js",
     "debug": "node src/index.js --debug",
-    "calibrate": "node src/calibrate.js"
+    "calibrate": "node src/calibrate.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch --runInBand",
+    "test:coverage": "jest --coverage --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/index.js",
+      "!src/postinstall.js",
+      "!src/calibrate.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov"
+    ],
+    "testTimeout": 15000,
+    "forceExit": true
   },
   "files": [
     "src/",
@@ -20,6 +41,9 @@
   ],
   "dependencies": {
     "playwright": "^1.45.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -37,7 +61,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Omar-Azam/deepseek-browser-agent"
+    "url": ""
   },
-  "homepage": "https://github.com/Omar-Azam/deepseek-browser-agent#readme"
+  "homepage": "https://github.com/yourname/deepseek-browser-agent#readme"
 }
