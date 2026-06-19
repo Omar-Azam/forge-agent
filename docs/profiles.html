@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Profiles — Forge Agent</title>
+  <meta name="description" content="Learn how to use agent profiles to optimise Forge Agent for different tech stacks.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Agent Profiles</h1>
+        <h2 id="what-are-profiles">What are Profiles?</h2>
+        <p>Profiles are pre-configured sets of instructions, tool preferences, and constraints that tune the agent for specific types of work. Using a profile helps the AI produce better code by focusing on the right patterns and tools for the job.</p>
+
+        <h2 id="available-profiles">Available Profiles</h2>
+
+        <h3 id="default">default</h3>
+        <p>General purpose configuration with no specific specialization. Balanced for a wide variety of tasks.</p>
+        <ul>
+          <li><strong>Max Iterations:</strong> 40</li>
+          <li><strong>Planning Mode:</strong> Off</li>
+        </ul>
+
+        <h3 id="backend">backend</h3>
+        <p>Optimised for Node.js, Python, Go, and REST API development. Focuses on modularity, error handling, and security.</p>
+        <ul>
+          <li><strong>Max Iterations:</strong> 50</li>
+          <li><strong>Planning Mode:</strong> On</li>
+          <li><strong>Best for:</strong> API design, database migrations, server logic, auth systems.</li>
+        </ul>
+        <pre><code>forge-agent --profile=backend "add JWT auth to the API"</code></pre>
+
+        <h3 id="frontend">frontend</h3>
+        <p>Optimised for React, Vue, HTML/CSS, and UI development. Focuses on component architecture, responsiveness, and accessibility.</p>
+        <ul>
+          <li><strong>Max Iterations:</strong> 40</li>
+          <li><strong>Planning Mode:</strong> Off</li>
+          <li><strong>Best for:</strong> Creating UI components, styling, client-side routing, state management.</li>
+        </ul>
+        <pre><code>forge-agent --profile=frontend "create a responsive navigation bar"</code></pre>
+
+        <h3 id="data-science">data-science</h3>
+        <p>Optimised for Python data analysis, ML, and Jupyter notebooks. Focuses on pandas, numpy, and reproducible code.</p>
+        <ul>
+          <li><strong>Max Iterations:</strong> 35</li>
+          <li><strong>Planning Mode:</strong> Off</li>
+        </ul>
+
+        <h3 id="devops">devops</h3>
+        <p>Optimised for Docker, CI/CD, shell scripts, and infrastructure. Focuses on idempotent operations and minimal images.</p>
+        <ul>
+          <li><strong>Max Iterations:</strong> 30</li>
+          <li><strong>Planning Mode:</strong> On</li>
+        </ul>
+
+        <h2 id="usage">Usage</h2>
+        <p>Activate a profile using the <code>--profile</code> flag:</p>
+        <pre><code>forge-agent --profile=backend "refactor the database layer"</code></pre>
+        <p>To see all available profiles in your terminal:</p>
+        <pre><code>forge-agent --list-profiles</code></pre>
+
+        <h2 id="custom-profiles">Custom Profiles</h2>
+        <p>You can create your own profiles by defining a JSON file and loading it with <code>--custom-profile</code>.</p>
+        <pre><code>{
+  "name": "my-custom-profile",
+  "description": "Optimised for my internal projects",
+  "systemPromptAddition": "Follow our internal style guide...",
+  "maxIterations": 60,
+  "planningMode": true
+}</code></pre>
+        <pre><code>forge-agent --custom-profile=./profile.json "my task"</code></pre>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

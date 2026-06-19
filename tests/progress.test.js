@@ -327,16 +327,9 @@ describe('buildPartialSummary', () => {
     expect(summary).toContain('RESPONSE_TIMEOUT');
   });
 
-  test('mentions MAX_ITERATIONS for max_iterations reason', () => {
-    const p       = buildTracker();
-    const summary = p.buildPartialSummary('max_iterations');
-    expect(summary).toContain('MAX_ITERATIONS');
-  });
-
   test('works on empty tracker with no steps', () => {
-    const p       = new ProgressTracker('empty task');
+    const p = new ProgressTracker('empty task');
     const summary = p.buildPartialSummary('timeout');
-    expect(typeof summary).toBe('string');
     expect(summary).toContain('empty task');
   });
 

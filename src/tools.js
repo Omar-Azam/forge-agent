@@ -17,22 +17,26 @@ const { readEnvFile, setEnvVar, deleteEnvVar, findEnvFiles, checkRequiredVars, f
 const { startProcess, stopProcess, getProcessStatus, listProcesses, getProcessLogs, waitForReady, formatProcessList, formatProcessLogs } = require('./process-manager');
 const { takeScreenshot } = require('./screenshot');
 const { readClipboard, writeClipboard } = require('./clipboard');
+const { loadAllPlugins } = require('./plugin-loader');
+const ToolCache = require('./tool-cache');
+const { smartTruncate } = require('./truncator');
+const security = require('./security');
+const os = require('os');
 
 // ─────────────────────────────────────────────
 //  Helpers
 // ─────────────────────────────────────────────
 
-/** Truncate long strings so they don't blow up the context window */
-function truncate(str, max = config.MAX_OUTPUT_LENGTH) {
-  if (!str) return '';
-  const s = String(str);
-  if (s.length <= max) return s;
-  const half = Math.floor(max / 2);
-  return (
-    s.slice(0, half) +
-    `\n\n⚠ [OUTPUT TRUNCATED — ${s.length.toLocaleString()} chars total, showing first & last ${half} chars]\n\n` +
-    s.slice(-half)
-  );
+/** Create the module-level cache instance */
+const cache = new ToolCache({
+  enabled: config.CACHE_ENABLED,
+  defaultTtlMs: config.CACHE_TTL_MS,
+  maxEntries: config.CACHE_MAX_ENTRIES
+});
+
+/** Smartly truncate long strings based on content type */
+function truncate(str, max = config.MAX_OUTPUT_LENGTH, type = 'text') {
+  return smartTruncate(str, max, { type });
 }
 
 /** Resolve a path relative to the working directory */
@@ -52,44 +56,16 @@ function resolve(filePath) {
  * For a stricter sandbox, set STRICT_SANDBOX=true in config
  * which blocks ALL access outside the working directory.
  */
-const BLOCKED_PATHS = [
-  '/etc/passwd', '/etc/shadow', '/etc/sudoers',
-  path.join(require('os').homedir(), '.ssh'),
-  path.join(require('os').homedir(), '.gnupg'),
-  path.join(require('os').homedir(), '.aws'),
-  path.join(require('os').homedir(), '.config', 'gcloud'),
-];
+const BLOCKED_PATHS = security.BLOCKED_PATHS;
 
 function assertSafePath(filePath, operation = 'access') {
-  const abs = resolve(filePath);
-
-  // Block known sensitive paths
-  for (const blocked of BLOCKED_PATHS) {
-    if (abs === blocked || abs.startsWith(blocked + path.sep)) {
-      const err = new Error(
-        `Security: ${operation} denied — "${filePath}" matches a protected path.\n` +
-        'If you need to access this path intentionally, move it outside protected locations.'
-      );
-      err.retryable = false;
-      throw err;
-    }
+  const validation = security.validatePath(filePath);
+  if (!validation.safe) {
+    const err = new Error(validation.reason);
+    err.retryable = false;
+    throw err;
   }
-
-  // Strict sandbox — block everything outside WORKING_DIR
-  if (config.STRICT_SANDBOX) {
-    const rel = path.relative(config.WORKING_DIR, abs);
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      const err = new Error(
-        `Security: ${operation} denied — "${filePath}" is outside the working directory.\n` +
-        `Working directory: ${config.WORKING_DIR}\n` +
-        'Use --dir to set a different working directory, or disable STRICT_SANDBOX in config.'
-      );
-      err.retryable = false;
-      throw err;
-    }
-  }
-
-  return abs;
+  return resolve(filePath);
 }
 
 function formatBytes(bytes) {
@@ -163,23 +139,45 @@ const TOOLS = {
       if (!fs.existsSync(abs))             throw Errors.fileNotFound(filePath);
       if (fs.statSync(abs).isDirectory())  throw Errors.pathIsDirectory(filePath);
 
-      let content = fs.readFileSync(abs, 'utf8');
+      // Fix 7 — Auto-detect and mask .env files
+      if (security.isEnvFile(filePath) && !config.ALLOW_ENV_PLAIN_READ) {
+        const envResult = readEnvFile(abs, {});
+        return envResult.vars
+          .map(v => `${v.key}=${v.masked ? v.value + ' (masked)' : v.value}`)
+          .join('\n');
+      }
+
+      let content;
+      try {
+        content = fs.readFileSync(abs, 'utf8');
+      } catch (err) {
+        throw classifyFsError(err, filePath, 'read');
+      }
+
+      // Fix 8 — Warn when reading files that commonly contain secrets
+      const warning = security.checkSensitiveFileType(filePath);
 
       if (start_line != null || end_line != null) {
         const lines = content.split('\n');
         const s = Math.max(0, (start_line || 1) - 1);
         const e = end_line != null ? end_line : lines.length;
         content = lines.slice(s, e).map((l, i) => `${s + i + 1}: ${l}`).join('\n');
-        return `[${filePath} | lines ${s + 1}–${e}]\n${truncate(content)}`;
+        const type = /\.(js|ts|py|c|cpp|go|rb|rs|php|java|html|css|sh)$/i.test(filePath) ? 'code' : 'text';
+        const result = `[${filePath} | lines ${s + 1}–${e}]\n${truncate(content, config.MAX_OUTPUT_LENGTH, type)}`;
+        return warning ? warning + '\n\n' + result : result;
       }
 
       // Add line numbers for large files to help the AI reference lines
       const lineCount = content.split('\n').length;
+      let output;
       if (lineCount <= 300) {
         const numbered = content.split('\n').map((l, i) => `${i + 1}: ${l}`).join('\n');
-        return `[${filePath} | ${lineCount} lines]\n${numbered}`;
+        output = `[${filePath} | ${lineCount} lines]\n${numbered}`;
+      } else {
+        const type = /\.(js|ts|py|c|cpp|go|rb|rs|php|java|html|css|sh)$/i.test(filePath) ? 'code' : 'text';
+        output = `[${filePath} | ${lineCount} lines — use start_line/end_line to read sections]\n${truncate(content, config.MAX_OUTPUT_LENGTH, type)}`;
       }
-      return `[${filePath} | ${lineCount} lines — use start_line/end_line to read sections]\n${truncate(content)}`;
+      return warning ? warning + '\n\n' + output : output;
     },
   },
 
@@ -304,7 +302,8 @@ const TOOLS = {
         }
         walk(abs, 0);
         if (results.length === 0) return '(empty)';
-        return results.map(p => p.replace(abs + path.sep, '')).sort().join('\n');
+        const out = results.map(p => p.replace(abs + path.sep, '')).sort().join('\n');
+        return truncate(out, config.MAX_OUTPUT_LENGTH, 'file_list');
       }
 
       const entries = fs.readdirSync(abs, { withFileTypes: true });
@@ -330,7 +329,8 @@ const TOOLS = {
         }
       });
 
-      return `[${dirPath}] — ${visible.length} items\n${lines.join('\n')}`;
+      const out = `[${dirPath}] — ${visible.length} items\n${lines.join('\n')}`;
+      return truncate(out, config.MAX_OUTPUT_LENGTH, 'file_list');
     },
   },
 
@@ -409,9 +409,14 @@ const TOOLS = {
         permissions : `0${(stat.mode & 0o777).toString(8)}`,
       };
       if (stat.isFile()) {
-        const content = fs.readFileSync(abs, 'utf8');
-        info.lines = content.split('\n').length;
-        info.encoding = 'utf-8';
+        try {
+          const content = fs.readFileSync(abs, 'utf8');
+          info.lines = content.split('\n').length;
+          info.encoding = 'utf-8';
+        } catch {
+          info.lines = 0;
+          info.encoding = 'unknown';
+        }
       }
       return JSON.stringify(info, null, 2);
     },
@@ -426,20 +431,38 @@ const TOOLS = {
       timeout : { type: 'number',  required: false, description: 'Timeout in milliseconds (default: 60000)' },
       env     : { type: 'object',  required: false, description: 'Extra environment variables as key-value pairs' },
     },
-    async execute({ command, cwd, timeout = 60_000, env = {} }) {
+    async execute({ command, cwd, timeout, env = {} }) {
       const workDir = cwd ? resolve(cwd) : config.WORKING_DIR;
+
+      // Fix 5 — Block dangerous commands
+      if (!config.ALLOW_DANGEROUS_COMMANDS) {
+        const validation = security.validateCommand(command);
+        if (!validation.safe) {
+          const err = new Error(validation.reason);
+          err.retryable = false;
+          throw err;
+        }
+      }
+
+      // Read timeout from config at execution time — not cached
+      const timeoutMs = timeout 
+        || (config.TOOL_TIMEOUT || 300_000);
+
+      if (config.DEBUG) {
+        logger.dim(`[run_command] Executing: ${command} (cwd: ${workDir})`);
+      }
 
       try {
         const output = execSync(command, {
           cwd         : workDir,
           encoding    : 'utf8',
-          timeout,
+          timeout     : timeoutMs,
           maxBuffer   : 20 * 1024 * 1024,
           env         : { ...process.env, ...env },
           stdio       : ['pipe', 'pipe', 'pipe'],
         });
         const result = (output || '').trim();
-        return truncate(result || '(command completed with no output)');
+        return truncate(result || '(command completed with no output)', config.MAX_OUTPUT_LENGTH, 'command_output');
       } catch (err) {
         throw classifyCommandError(err, command);
       }
@@ -553,7 +576,7 @@ const TOOLS = {
 
       if (matches.length === 0) return `No matches found for: ${pattern}`;
       const result = matches.join('\n' + '─'.repeat(40) + '\n');
-      return truncate(result);
+      return truncate(result, config.MAX_OUTPUT_LENGTH, 'text');
     },
   },
 
@@ -568,7 +591,7 @@ const TOOLS = {
         const client  = url.startsWith('https') ? https : http;
         const options = {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; DeepSeekAgent/1.0)',
+            'User-Agent': 'Mozilla/5.0 (compatible; ForgeAgent/1.0)',
             'Accept'    : 'text/html,text/plain,application/json',
           },
         };
@@ -594,7 +617,7 @@ const TOOLS = {
               .replace(/<[^>]+>/g, ' ')
               .replace(/\s{3,}/g, '\n\n')
               .trim();
-            resolve_p(truncate(text));
+            resolve_p(truncate(text, config.MAX_OUTPUT_LENGTH, 'text'));
           });
         });
 
@@ -623,7 +646,13 @@ const TOOLS = {
     async execute({ files }) {
       if (!Array.isArray(files)) throw new Error('"files" must be an array of {path, content}');
       const results = [];
-      for (const { path: filePath, content } of files) {
+      for (const item of files) {
+        if (!item || !item.path) {
+          logger.warn('write_files: item missing path, skipping');
+          continue;
+        }
+        const filePath = item.path;
+        const content  = item.content || '';
         const abs = resolve(filePath);
         try {
           fs.mkdirSync(path.dirname(abs), { recursive: true });
@@ -657,7 +686,7 @@ const TOOLS = {
         if (behind && behind !== '0') lines.push(`Behind remote by ${behind} commit(s)`);
         lines.push('');
         lines.push(status || '(working tree clean)');
-        return lines.join('\n');
+        return truncate(lines.join('\n'), config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git status');
       }
@@ -680,7 +709,7 @@ const TOOLS = {
       const cmd     = `git log ${branch} --oneline --decorate -n ${limit} ${fileArg}`;
       try {
         const out = runGit(cmd, cwd);
-        return out || '(no commits found)';
+        return truncate(out || '(no commits found)', config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git log');
       }
@@ -713,7 +742,7 @@ const TOOLS = {
 
       try {
         const out = runGit(cmd, cwd);
-        return truncate(out || '(no differences)');
+        return truncate(out || '(no differences)', config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git diff');
       }
@@ -733,7 +762,7 @@ const TOOLS = {
       const flag = include_remote ? '-a' : '';
       try {
         const out = runGit(`git branch ${flag} --sort=-committerdate`, cwd);
-        return out || '(no branches)';
+        return truncate(out || '(no branches)', config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git branch');
       }
@@ -752,7 +781,7 @@ const TOOLS = {
       assertIsGitRepo(cwd);
       try {
         const out = runGit(`git show --stat ${ref}`, cwd);
-        return truncate(out);
+        return truncate(out, config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git show');
       }
@@ -777,7 +806,7 @@ const TOOLS = {
         : start_line ? `-L ${start_line},+20` : '';
       try {
         const out = runGit(`git blame ${lineArg} "${abs}"`, cwd);
-        return truncate(out);
+        return truncate(out, config.MAX_OUTPUT_LENGTH, 'git_output');
       } catch (err) {
         throw classifyCommandError(err, 'git blame');
       }
@@ -799,7 +828,7 @@ const TOOLS = {
       const dir = resolve(directory || config.WORKING_DIR);
       try {
         const result = searchCodebase(query, dir, { type, ext, limit, fuzzy });
-        return truncate(formatSearchResult(result));
+        return truncate(formatSearchResult(result), config.MAX_OUTPUT_LENGTH, 'text');
       } catch (err) {
         throw new Error(`Codebase search failed: ${err.message}`);
       }
@@ -842,7 +871,7 @@ const TOOLS = {
           testName: test_name,
           timeout,
         });
-        return truncate(formatTestResult(result));
+        return truncate(formatTestResult(result), config.MAX_OUTPUT_LENGTH, 'test_output');
       } catch (err) {
         throw new Error(`Test runner failed: ${err.message}`);
       }
@@ -1222,6 +1251,20 @@ const TOOLS = {
 
 };
 
+// ── Load Custom Plugins ───────────────────────────────────────────────────────
+if (fs.existsSync(config.PLUGIN_DIR)) {
+  const { loaded, failed } = loadAllPlugins(config.PLUGIN_DIR, Object.keys(TOOLS));
+  
+  for (const plugin of loaded) {
+    TOOLS[plugin.name] = plugin;
+    logger.success(`Loaded custom plugin: ${plugin.name}`);
+  }
+
+  for (const fail of failed) {
+    logger.warn(`Failed to load plugin ${fail.file}: ${fail.error}`);
+  }
+}
+
 // ─────────────────────────────────────────────
 //  Generate tool docs for the system prompt
 // ─────────────────────────────────────────────
@@ -1235,16 +1278,143 @@ function getToolDescriptions() {
   }).join('\n\n');
 }
 
+/**
+ * Append a tool call entry to the audit log.
+ */
+function appendToAuditLog(entry) {
+  if (!config.AUDIT_LOG) return;
+  try {
+    const logDir = path.join(os.homedir(), '.deepseek-agent');
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+    
+    const logPath = path.join(logDir, 'audit.log');
+    const line = JSON.stringify({
+      ts: new Date().toISOString(),
+      workingDir: config.WORKING_DIR,
+      ...entry
+    }) + '\n';
+    fs.appendFileSync(logPath, line, 'utf8');
+  } catch (err) {
+    // ignore
+  }
+}
+
+/**
+ * Validate tool arguments against the tool's parameter schema.
+ */
+function validateToolArgs(toolName, tool, args) {
+  if (!config.PARAM_VALIDATION) return;
+  
+  const params = tool.parameters || {};
+  for (const [paramName, spec] of Object.entries(params)) {
+    const value = args[paramName];
+    
+    // Check required
+    if (spec.required && (value === undefined || value === null)) {
+      throw Errors.invalidToolArgs(toolName, paramName, spec.type + ' (REQUIRED)', value);
+    }
+    
+    if (value !== undefined && value !== null) {
+      // Check type
+      let valid = true;
+      if (spec.type === 'string' && typeof value !== 'string') valid = false;
+      else if (spec.type === 'number' && typeof value !== 'number') valid = false;
+      else if (spec.type === 'boolean' && typeof value !== 'boolean') valid = false;
+      else if (spec.type === 'array' && !Array.isArray(value)) valid = false;
+      else if (spec.type === 'object' && (typeof value !== 'object' || Array.isArray(value))) valid = false;
+      
+      if (!valid) {
+        throw Errors.invalidToolArgs(toolName, paramName, spec.type, value);
+      }
+    }
+  }
+}
+
 // ─────────────────────────────────────────────
 //  Execute a tool by name
 // ─────────────────────────────────────────────
 async function executeTool(name, args) {
+  // Fix 13 — Validate tool name against allowlist
+  if (!/^[a-z_][a-z0-9_]*$/.test(name)) {
+    throw new Error(`Security: invalid tool name "${name}"`);
+  }
+
   const tool = TOOLS[name];
   if (!tool) {
     const available = Object.keys(TOOLS).join(', ');
     throw new Error(`Unknown tool: "${name}". Available tools: ${available}`);
   }
-  return await tool.execute(args);
+
+  // Fix 12 — Validate all tool parameters before execution
+  validateToolArgs(name, tool, args);
+
+  // 1. Check Cache
+  try {
+    if (cache.shouldCache(name)) {
+      const cached = cache.get(name, args);
+      if (cached !== null) {
+        appendToAuditLog({ tool: name, args, status: 'cache_hit', exitCode: 0 });
+        return cached;
+      }
+    }
+  } catch (err) {
+    if (config.DEBUG) console.warn(`[cache] get error: ${err.message}`);
+  }
+
+  // 2. Execute tool
+  const start = Date.now();
+  let result;
+  let exitCode = 0;
+  try {
+    result = await tool.execute(args);
+  } catch (err) {
+    exitCode = 1;
+    throw err;
+  } finally {
+    const ms = Date.now() - start;
+    appendToAuditLog({ tool: name, args, exitCode, ms });
+  }
+
+  // 3. Update Cache & Invalidate
+  try {
+    if (cache.shouldCache(name)) {
+      cache.set(name, args, result);
+    }
+
+    const toInvalidate = cache.invalidatesCache(name);
+    if (toInvalidate) {
+      for (const toolName of toInvalidate) {
+        cache.invalidateByTool(toolName);
+      }
+    }
+  } catch (err) {
+    if (config.DEBUG) console.warn(`[cache] set/invalidate error: ${err.message}`);
+  }
+
+  return result;
 }
 
-module.exports = { TOOLS, executeTool, getToolDescriptions };
+const loadedPlugins = [];
+if (fs.existsSync(config.PLUGIN_DIR)) {
+  const { loaded, failed } = loadAllPlugins(config.PLUGIN_DIR, Object.keys(TOOLS));
+  
+  for (const plugin of loaded) {
+    TOOLS[plugin.name] = plugin;
+    loadedPlugins.push(plugin.name);
+    logger.success(`Loaded custom plugin: ${plugin.name}`);
+  }
+
+  for (const fail of failed) {
+    logger.warn(`Failed to load plugin ${fail.file}: ${fail.error}`);
+  }
+}
+
+function getLoadedPluginCount() {
+  return loadedPlugins.length;
+}
+
+function getLoadedPlugins() {
+  return loadedPlugins;
+}
+
+module.exports = { TOOLS, executeTool, getToolDescriptions, getLoadedPluginCount, getLoadedPlugins, cache };

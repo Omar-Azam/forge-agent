@@ -1,72 +1,144 @@
-# Contributing to DeepSeek Browser Agent
+# Contributing to Forge Agent
 
-Thank you for your interest in contributing! This project is in active development and all contributions are welcome.
+Thank you for considering contributing to Forge Agent! We welcome contributions from everyone. This document provides guidelines for contributing to the project.
 
-## Getting Started
+## Ways to Contribute
+- 🐛 **Report bugs:** Use the Bug Report template on GitHub for `@omar-azam/forge-agent`.
+- 💡 **Suggest features:** Use the Feature Request template.
+- 📝 **Improve documentation:** Fix typos, clarify sections, or add new examples.
+- 🔧 **Fix bugs:** Check the issues list for "bug" labels.
+- ⚡ **Add new tools:** Implement new capabilities in `src/tools.js`.
+- 🔌 **Share plugins:** Build and share custom plugins via GitHub Discussions.
 
+## Development Setup
+
+### Prerequisites
+- Node.js 18 or higher
+- npm 8 or higher
+- Git
+
+### Clone and Install
 ```bash
-git clone https://github.com/YOUR_USERNAME/deepseek-browser-agent
-cd deepseek-browser-agent
+git clone https://github.com/Omar-Azam/forge-agent
+cd forge-agent
 npm install
-npx playwright install chromium
+```
+
+### Verify Setup
+```bash
+npm test                      # All tests must pass
+node src/index.js --version   # Should print: Forge Agent v2.0.0
+```
+
+### Run in Development
+```bash
+# Using the local entry point
 node src/index.js --interactive
+node src/index.js "your test task"
+
+# Using the global command (if installed via npm link)
+forge-agent --interactive
 ```
 
 ## Project Structure
 
-| File | Role |
-|---|---|
-| `src/agent.js` | Core agent loop — edit this to change how tasks run |
-| `src/browser.js` | All Playwright / DOM interaction |
-| `src/parser.js` | Parses AI text responses into tool calls |
-| `src/tools.js` | Add new tools here |
-| `src/prompt.js` | System prompt sent to DeepSeek |
-| `src/config.js` | Configuration loading |
+- `src/index.js`: CLI entry point and argument parsing.
+- `src/agent.js`: Core agent loop and state management.
+- `src/browser.js`: Playwright browser automation wrapper.
+- `src/adapters/`: Model-specific browser interface logic.
+- `src/tools.js`: Implementation of all agent tools.
+- `src/planner.js`: Task planning and step generation.
+- `src/memory.js`: Long-term project memory system.
+- `src/history.js`: Task history and execution logs.
+- `src/config.js`: Central configuration management.
+- `src/logger.js`: Terminal output and UI rendering.
+- `src/parser.js`: AI response parsing and tool call extraction.
+- `src/benchmarks/`: Performance measurement suite.
+- `src/calibrate.js`: Utility to auto-detect browser selectors.
+- `src/postinstall.js`: Post-install setup script.
+- `tests/`: Comprehensive test suite using Jest.
+- `docs/`: Documentation site source.
 
 ## Adding a New Tool
 
-1. Open `src/tools.js`
-2. Add an entry to the `TOOLS` object following the existing pattern:
+1. Open `src/tools.js`.
+2. Add your tool definition to the `TOOLS` object following the existing pattern.
+3. Add the tool to `shouldCache()` in `src/tool-cache.js` if it is a read-only operation.
+4. Write at least 3 tests in `tests/tools.test.js` (or a new test file).
+5. Document the tool in `docs/tools.html`.
+6. Run `npm test` to ensure everything passes.
 
-```js
-my_new_tool: {
+Example minimal tool:
+```javascript
+my_tool: {
   description: 'What this tool does.',
   parameters: {
-    param1: { type: 'string', required: true,  description: 'What param1 is' },
-    param2: { type: 'number', required: false, description: 'What param2 is' },
+    input: { type: 'string', required: true, description: 'The input value' },
   },
-  async execute({ param1, param2 }) {
-    // your implementation
-    return 'result string';
+  async execute({ input }) {
+    return `Result: ${input}`;
   },
 },
 ```
 
-The tool is automatically included in the AI's system prompt — no other files need changing.
+## Adding a New Template
 
-## Pull Request Guidelines
+1. Open `src/templates.js`.
+2. Add your template to the `BUILT_IN_TEMPLATES` object.
+3. Write at least 2 tests in `tests/templates.test.js`.
+4. Add the template to `docs/templates.html`.
 
-- One feature or bug fix per PR
-- Keep the existing code style (single quotes, 2-space indent)
-- Update `README.md` if you add a new tool or config option
-- Test your change manually before submitting
+## Writing Tests
+- **Location:** All tests go in the `tests/` directory.
+- **Framework:** We use Jest.
+- **Requirements:** Every new feature needs at least 10 tests.
+- **Isolation:** Tests must not depend on an actual browser or network. Use mocks where necessary.
+- **Cleanup:** Always clean up temporary files in `afterAll()`.
+- **Environment:** Use `os.tmpdir()` for file-based tests. Never touch `~/.deepseek-agent/`.
 
-## Reporting Bugs
+## Code Style
+- Use **semicolons** and maintain consistent indentation (match existing files).
+- Use `const` and `let`, never `var`.
+- Prefer `async/await` over callbacks or `.then()`.
+- Use descriptive variable and function names.
+- Document complex logic with comments.
+- Keep functions under **80 lines**; split them if they grow larger.
+- Error messages should follow the **what/why/how** pattern.
 
-Open a GitHub issue and include:
+## Commit Message Format
+We use a structured commit message format:
+`type: brief description (under 72 chars)`
 
-- Your OS and Node.js version (`node --version`)
-- The task you were running
-- Full terminal output with `deepseek-agent --debug "your task"`
-- Whether the DeepSeek web UI itself works normally in a regular browser
+**Types:**
+- `feat`: A new feature or tool
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `test`: Adding or updating tests
+- `refactor`: Code changes that neither fix a bug nor add a feature
+- `perf`: Performance improvements
+- `chore`: Maintenance tasks (dependencies, build scripts, etc.)
 
-## Good First Issues
+Example: `feat: add xml_reader tool for parsing XML files`
 
-- Adding Windows path compatibility
-- Writing a test suite
-- Improving error messages
-- Adding new tools (database access, image generation, etc.)
+## Pull Request Process
 
-## Code of Conduct
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feat/my-new-tool`.
+3. Implement your changes and add tests.
+4. Run `npm test` and ensure all tests pass.
+5. Update relevant documentation in `docs/`.
+6. Open a PR with a clear description of what changed and why.
+7. Fill out the PR template completely.
 
-Be respectful. Criticism of code is welcome; criticism of people is not.
+### What Makes a Good PR?
+- ✅ Focused on a single change.
+- ✅ All tests pass.
+- ✅ Includes new tests for new logic.
+- ✅ Documentation is updated.
+- ✅ No unrelated refactoring or cleanup.
+- ✅ Follows the commit message format.
+
+## Getting Help
+- If you have questions, please open a **GitHub Discussion**.
+- For bugs, open a **GitHub Issue**.
+- Check existing issues and discussions before opening new ones.

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tools Reference — Forge Agent</title>
+  <meta name="description" content="Detailed documentation for all 37+ built-in tools in Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search tools...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>All Tools Reference</h1>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <p>Forge Agent provides a powerful set of 37+ tools that the AI can use to interact with your system. Tools are grouped by category below.</p>
+
+        <h2 id="file-operations">File Operations</h2>
+
+        <h3 id="read_file">read_file</h3>
+        <p>Read the full contents of a file. Optionally read specific line ranges.</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>path</code></td><td>string</td><td>✅</td><td>Path to the file</td></tr>
+            <tr><td><code>start_line</code></td><td>number</td><td></td><td>First line to read (1-indexed)</td></tr>
+            <tr><td><code>end_line</code></td><td>number</td><td></td><td>Last line to read (inclusive)</td></tr>
+          </tbody>
+        </table>
+        <pre><code>{
+  "name": "read_file",
+  "args": { "path": "src/index.js", "start_line": 1, "end_line": 50 }
+}</code></pre>
+
+        <h3 id="write_file">write_file</h3>
+        <p>Write (create or overwrite) a file with given content. Creates parent directories automatically.</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>path</code></td><td>string</td><td>✅</td><td>Destination file path</td></tr>
+            <tr><td><code>content</code></td><td>string</td><td>✅</td><td>Full file content to write</td></tr>
+          </tbody>
+        </table>
+        <pre><code>{
+  "name": "write_file",
+  "args": { "path": "test.txt", "content": "Hello World" }
+}</code></pre>
+
+        <h3 id="append_to_file">append_to_file</h3>
+        <p>Append text to the end of an existing file (or create it if missing).</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>path</code></td><td>string</td><td>✅</td><td>File path</td></tr>
+            <tr><td><code>content</code></td><td>string</td><td>✅</td><td>Text to append</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="replace_in_file">replace_in_file</h3>
+        <p>Find and replace text in a file. Supports regex patterns.</p>
+
+        <h3 id="delete_file">delete_file</h3>
+        <p>Permanently delete a file.</p>
+
+        <h3 id="move_file">move_file</h3>
+        <p>Move or rename a file or directory.</p>
+
+        <h3 id="copy_file">copy_file</h3>
+        <p>Copy a file to a new location.</p>
+
+        <h3 id="get_file_info">get_file_info</h3>
+        <p>Get metadata about a file or directory (size, modified date, line count, etc.).</p>
+
+        <h3 id="list_directory">list_directory</h3>
+        <p>List files and folders in a directory, optionally recursive.</p>
+
+        <h3 id="create_directory">create_directory</h3>
+        <p>Create a directory (and all necessary parent directories).</p>
+
+        <h3 id="write_files">write_files</h3>
+        <p>Write multiple files at once — useful for scaffolding projects.</p>
+
+        <h2 id="search-navigation">Search & Navigation</h2>
+
+        <h3 id="search_in_files">search_in_files</h3>
+        <p>Search for text patterns inside files (like grep -r). Returns matching lines with filenames.</p>
+
+        <h3 id="search_codebase">search_codebase</h3>
+        <p>Intelligent multi-file codebase search. Finds functions, classes, variables, and text by name or meaning.</p>
+
+        <h3 id="find_files">find_files</h3>
+        <p>Search for files by name pattern (glob-style, e.g. "*.js").</p>
+
+        <h2 id="shell-processes">Shell & Processes</h2>
+
+        <h3 id="run_command">run_command</h3>
+        <p>Execute a shell command and return its output. Runs in the working directory by default.</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>command</code></td><td>string</td><td>✅</td><td>Shell command to run</td></tr>
+            <tr><td><code>cwd</code></td><td>string</td><td></td><td>Working directory for the command</td></tr>
+            <tr><td><code>timeout</code></td><td>number</td><td></td><td>Timeout in milliseconds</td></tr>
+          </tbody>
+        </table>
+        <pre><code>{
+  "name": "run_command",
+  "args": { "command": "npm test" }
+}</code></pre>
+
+        <h3 id="start_process">start_process</h3>
+        <p>Start a long-running background process (dev server, watcher, build tool).</p>
+
+        <h3 id="stop_process">stop_process</h3>
+        <p>Stop a background process started with start_process.</p>
+
+        <h3 id="list_processes">list_processes</h3>
+        <p>List all background processes started in this session.</p>
+
+        <h3 id="read_process_logs">read_process_logs</h3>
+        <p>Read recent output from a background process.</p>
+
+        <h2 id="git-integration">Git Integration</h2>
+
+        <h3 id="git_status">git_status</h3>
+        <p>Show the working tree status — staged, unstaged, and untracked files.</p>
+
+        <h3 id="git_log">git_log</h3>
+        <p>Show recent commit history.</p>
+
+        <h3 id="git_diff">git_diff</h3>
+        <p>Show changes between commits, working tree and index, or two branches.</p>
+
+        <h3 id="git_branches">git_branches</h3>
+        <p>List all local (and optionally remote) branches.</p>
+
+        <h3 id="git_show">git_show</h3>
+        <p>Show the full details of a specific commit.</p>
+
+        <h3 id="git_blame">git_blame</h3>
+        <p>Show who last modified each line of a file.</p>
+
+        <h2 id="development">Development</h2>
+
+        <h3 id="run_tests">run_tests</h3>
+        <p>Run the project's test suite and return structured pass/fail results.</p>
+
+        <h3 id="install_package">install_package</h3>
+        <p>Install one or more packages using the project's package manager.</p>
+
+        <h3 id="diff_files">diff_files</h3>
+        <p>Generate a unified diff showing the differences between two files.</p>
+
+        <h3 id="patch_file">patch_file</h3>
+        <p>Apply a unified diff patch to a file.</p>
+
+        <h2 id="environment">Environment</h2>
+
+        <h3 id="read_env">read_env</h3>
+        <p>Read variables from a .env file. Secret values are automatically masked.</p>
+
+        <h3 id="set_env_var">set_env_var</h3>
+        <p>Set or update a single environment variable in a .env file.</p>
+
+        <h3 id="delete_env_var">delete_env_var</h3>
+        <p>Remove a variable from a .env file.</p>
+
+        <h3 id="list_env_files">list_env_files</h3>
+        <p>Find all .env files in the project and list their variable names.</p>
+
+        <h3 id="check_env_vars">check_env_vars</h3>
+        <p>Verify that all required environment variables are present.</p>
+
+        <h2 id="system">System</h2>
+
+        <h3 id="take_screenshot">take_screenshot</h3>
+        <p>Capture a screenshot of the entire screen.</p>
+
+        <h3 id="read_clipboard">read_clipboard</h3>
+        <p>Read the current text content from the system clipboard.</p>
+
+        <h3 id="write_clipboard">write_clipboard</h3>
+        <p>Write text to the system clipboard.</p>
+
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

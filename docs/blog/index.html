@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Forge Agent</title>
+  <meta name="description" content="Latest news, roadmap updates, and engineering deep dives from the Forge Agent team.">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .blog-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+      .blog-cards { grid-template-columns: 1fr; }
+    }
+    .blog-card {
+      display: block;
+      padding: 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .blog-card:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+    .blog-date { font-size: 0.8rem; color: var(--text-secondary); }
+    .blog-card h3 { margin: 0.5rem 0; color: var(--text-primary); }
+    .blog-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 1rem; }
+    .read-more { color: var(--accent-color); font-size: 0.9rem; font-weight: bold; }
+    .post-tags { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    .tag { font-size: 0.7rem; background: #2a2f3d; padding: 2px 8px; border-radius: 4px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="../index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="../getting-started.html" class="nav-link">Installation</a>
+        <a href="../docker.html" class="nav-link">Docker</a>
+        
+        <div class="nav-section">📖 Reference</div>
+        <a href="../cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="index.html" class="nav-link active">📰 Blog</a>
+        
+        <div class="nav-section">💙 Support</div>
+        <a href="../sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Forge Agent Blog</h1>
+        <p class="lead">Latest news, roadmap updates, and engineering deep dives.</p>
+
+        <div class="blog-cards">
+          <!-- Launch Post -->
+          <a href="launch.html" class="blog-card">
+            <span class="blog-date">June 11, 2026</span>
+            <h3>Introducing Forge Agent</h3>
+            <p>Autonomous AI coding with no API key. Learn about the 48-day journey and how we drive web-based AI assistants via browser automation.</p>
+            <span class="read-more">Read more →</span>
+            <div class="post-tags">
+              <span class="tag">open-source</span>
+              <span class="tag">ai</span>
+              <span class="tag">nodejs</span>
+            </div>
+          </a>
+
+          <!-- Roadmap Post -->
+          <a href="roadmap-2026.html" class="blog-card">
+            <span class="blog-date">June 11, 2026</span>
+            <h3>Roadmap: What's Coming in 2026</h3>
+            <p>A look at the future of Forge Agent. From v1.5.0 scaling to the v2.0.0 platform evolution, including local models and multi-agent coordination.</p>
+            <span class="read-more">Read more →</span>
+            <div class="post-tags">
+              <span class="tag">roadmap</span>
+              <span class="tag">ai</span>
+              <span class="tag">future</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+  </footer>
+
+  <script src="../../js/nav.js"></script>
+</body>
+</html>

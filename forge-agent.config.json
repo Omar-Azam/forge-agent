@@ -1,0 +1,11 @@
+{
+  "_comment": "DeepSeek Agent — local config. Any key here overrides src/config.js defaults.",
+
+  "HEADLESS": false,
+  "MAX_ITERATIONS": 100,
+  "RESPONSE_TIMEOUT": 600000,
+  "STABLE_DELAY": 1500,
+  "SEND_DELAY": 600,
+  "MAX_OUTPUT_LENGTH": 8000,
+  "DEBUG": false
+}

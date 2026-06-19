@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Plugins — Forge Agent</title>
+  <meta name="description" content="Extend Forge Agent with your own tools using the custom plugin system.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Custom Plugins</h1>
+        <h2 id="what-are-plugins">What are Plugins?</h2>
+        <p>Plugins allow you to add new tools to Forge Agent without editing the core source code. Any <code>.js</code> file placed in the plugins directory is automatically loaded and made available to the AI on every run.</p>
+
+        <h2 id="plugin-directory">Plugin Directory</h2>
+        <p>By default, Forge Agent looks for plugins in:</p>
+        <code>~/.deepseek-agent/tools/</code>
+
+        <h2 id="writing-your-first-plugin">Writing Your First Plugin</h2>
+        <p>A plugin is a standard Node.js module that exports an object with the following fields:</p>
+        <ul>
+          <li><code>name</code>: Unique tool name (lowercase, underscores only).</li>
+          <li><code>description</code>: A clear explanation of what the tool does for the AI.</li>
+          <li><code>parameters</code>: An object defining the arguments the tool accepts.</li>
+          <li><code>execute</code>: An async function that performs the action and returns a string result.</li>
+        </ul>
+
+        <h3>Example: fetch_weather.js</h3>
+        <pre><code>module.exports = {
+  name: 'fetch_weather',
+  description: 'Get current weather for a city',
+  parameters: {
+    city: { type: 'string', required: true, description: 'City name' },
+  },
+  async execute({ city }) {
+    const https = require('https');
+    return new Promise((resolve, reject) => {
+      https.get(`https://wttr.in/${city}?format=3`, res => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => resolve(data.trim()));
+      }).on('error', reject);
+    });
+  },
+};</code></pre>
+
+        <h2 id="generating-a-stub">Generating a Stub</h2>
+        <p>Use the CLI to create a new plugin file with example boilerplate:</p>
+        <pre><code>forge-agent --new-plugin my_tool</code></pre>
+
+        <h2 id="disabling-a-plugin">Disabling a Plugin</h2>
+        <p>To temporarily disable a plugin without deleting the file, rename it to start with an underscore:</p>
+        <code>_my_tool.js</code>
+
+        <h2 id="constraints">Plugin Constraints</h2>
+        <ul>
+          <li><strong>Shadowing:</strong> Custom plugins cannot have the same name as built-in tools.</li>
+          <li><strong>Output:</strong> The <code>execute</code> function must always return a string (the AI reads this string as the result).</li>
+          <li><strong>Safety:</strong> Plugin errors are caught and shown as warnings; they will not crash the main agent loop.</li>
+        </ul>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

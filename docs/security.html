@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Model — Forge Agent</title>
+  <meta name="description" content="Security posture, sandbox modes, and secret masking in Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link active">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Security Model</h1>
+        
+        <h2 id="overview">Security Overview</h2>
+        <p>Forge Agent executes arbitrary commands and interacts with your local filesystem. To ensure your safety, we implement a multi-layered security model that handles trust boundaries between the AI and your machine.</p>
+
+        <h2 id="protected-paths">Protected Paths</h2>
+        <p>Certain system-critical and sensitive paths are <strong>always blocked</strong> from being read or written by the agent, regardless of configuration. These include:</p>
+        <ul>
+          <li>System files: <code>/etc/passwd</code>, <code>/etc/hosts</code>, <code>/etc/sudoers</code></li>
+          <li>Credentials: <code>~/.ssh</code>, <code>~/.aws</code>, <code>~/.npmrc</code>, <code>~/.git-credentials</code></li>
+          <li>Configuration: <code>~/.gnupg</code>, <code>~/.config/gh</code>, <code>~/.docker/config.json</code></li>
+        </ul>
+
+        <h2 id="secret-masking">Secret Masking</h2>
+        <p>Forge Agent automatically protects your secrets:</p>
+        <ul>
+          <li><strong>.env files:</strong> Automatically identified and masked. Values are replaced with <code>**** (masked)</code> before being sent to the AI.</li>
+          <li><strong>Sensitive extensions:</strong> Files like <code>.pem</code>, <code>.key</code>, and <code>.pfx</code> trigger a security warning in the agent loop.</li>
+          <li><strong>Output Redaction:</strong> Common secret patterns (API keys, JWTs, long hex strings) are redacted from the tool outputs and history logs.</li>
+        </ul>
+
+        <h2 id="sandbox-modes">Sandbox Modes</h2>
+        <p>You can control the level of filesystem access the agent has:</p>
+        <ul>
+          <li><strong>Standard Mode (Default):</strong> Blocks sensitive paths but allows access outside the working directory (e.g., to read global node_modules or system documentation).</li>
+          <li><strong>Strict Sandbox (<code>STRICT_SANDBOX: true</code>):</strong> Blocks ALL file access outside the current working directory. It also performs symlink escape detection to prevent the agent from following symlinks to outside locations.</li>
+        </ul>
+
+        <h2 id="command-safety">Command Safety</h2>
+        <p>Dangerous commands that could cause irreversible damage are blocked by default:</p>
+        <ul>
+          <li>Destructive: <code>rm -rf /</code>, <code>rm -rf ~</code>, <code>mkfs</code></li>
+          <li>Exploits: <code>:(){ :|:& };:</code> (fork bomb)</li>
+        </ul>
+        <p>To allow these commands for advanced use cases, set <code>ALLOW_DANGEROUS_COMMANDS: true</code>.</p>
+
+        <h2 id="audit-log">Audit Logging</h2>
+        <p>Enable <code>AUDIT_LOG: true</code> to record every tool call the agent makes. This creates an append-only log file at <code>~/.deepseek-agent/audit.log</code> in JSONL format, which you can use for security reviews.</p>
+
+        <h2 id="reporting">Reporting Vulnerabilities</h2>
+        <p>Please report security issues privately via GitHub Security Advisories or as specified in our <a href="https://github.com/Omar-Azam/forge-agent/blob/main/SECURITY.md">SECURITY.md</a> file.</p>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

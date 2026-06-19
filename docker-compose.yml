@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  forge:
+    image: forge-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: forge-agent
+    volumes:
+      # Mount current directory as workspace so agent can read/write project files
+      - .:/workspace
+      # Mount forge config directory to persist sessions, memory, history
+      - forge-data:/root/.deepseek-agent
+      # Mount custom plugins directory
+      - ./plugins:/root/.deepseek-agent/tools:ro
+    environment:
+      - HEADLESS=true
+      - NODE_ENV=production
+    network_mode: host
+    # network_mode: host needed so Playwright can reach chat.deepseek.com
+    # without complex bridge network configuration
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+
+volumes:
+  forge-data:
+    name: forge-agent-data

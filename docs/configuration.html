@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration — Forge Agent</title>
+  <meta name="description" content="Reference for global and project-specific configuration in Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Configuration</h1>
+        <h2 id="config-locations">Config File Locations</h2>
+        <p>Forge Agent loads configuration in the following order of priority (highest wins):</p>
+        <ol>
+          <li><strong>Project Config:</strong> <code>deepseek-agent.config.json</code> in the working directory.</li>
+          <li><strong>Global Config:</strong> <code>~/.deepseek-agent/config.json</code> in your home directory.</li>
+          <li><strong>Defaults:</strong> Internal hardcoded defaults.</li>
+        </ol>
+
+        <h2 id="all-config-keys">All Config Keys</h2>
+        <table>
+          <thead>
+            <tr><th>Key</th><th>Type</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>MODEL</code></td><td>string</td><td>"deepseek"</td><td>AI model: deepseek, chatgpt, gemini.</td></tr>
+            <tr><td><code>MAX_ITERATIONS</code></td><td>number</td><td>100</td><td>Max steps before the agent stops.</td></tr>
+            <tr><td><code>RESPONSE_TIMEOUT</code></td><td>number</td><td>600000</td><td>Timeout for AI responses (ms).</td></tr>
+            <tr><td><code>HEADLESS</code></td><td>boolean</td><td>false</td><td>Run browser in invisible mode.</td></tr>
+            <tr><td><code>MEMORY_ENABLED</code></td><td>boolean</td><td>true</td><td>Persist project memory across runs.</td></tr>
+            <tr><td><code>STRICT_SANDBOX</code></td><td>boolean</td><td>false</td><td>Restrict file access to working dir.</td></tr>
+            <tr><td><code>ALLOW_DANGEROUS_COMMANDS</code></td><td>boolean</td><td>false</td><td>Allow rm -rf and similar commands.</td></tr>
+            <tr><td><code>ALLOW_ENV_PLAIN_READ</code></td><td>boolean</td><td>false</td><td>Send .env files unmasked to AI.</td></tr>
+            <tr><td><code>AUDIT_LOG</code></td><td>boolean</td><td>false</td><td>Log all tool calls to audit.log.</td></tr>
+            <tr><td><code>PARAM_VALIDATION</code></td><td>boolean</td><td>true</td><td>Validate tool parameters before execution.</td></tr>
+            <tr><td><code>PLANNING_MODE</code></td><td>boolean</td><td>false</td><td>Produce execution plans.</td></tr>
+            <tr><td><code>NO_TUI</code></td><td>boolean</td><td>false</td><td>Disable the terminal UI.</td></tr>
+            <tr><td><code>DISABLE_SPONSOR_NUDGE</code></td><td>boolean</td><td>false</td><td>Hide the small donation reminder.</td></tr>
+            <tr><td><code>DOCKER_CONTAINER</code></td><td>string</td><td>""</td><td>Internal ID when running inside Docker.</td></tr>
+            <tr><td><code>OUTPUT_FORMAT</code></td><td>string</td><td>"text"</td><td>Result format: text, json, markdown.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="setup-wizard">Setup Wizard</h2>
+        <p>The easiest way to configure Forge Agent is through the setup wizard:</p>
+        <pre><code>forge-agent --setup</code></pre>
+
+        <h2 id="example-configs">Example Configs</h2>
+
+        <h3>Minimal / CI Mode</h3>
+        <pre><code>{
+  "HEADLESS": true,
+  "NO_TUI": true,
+  "MEMORY_ENABLED": false
+}</code></pre>
+
+        <h3>Slow Machine / Connection</h3>
+        <pre><code>{
+  "RESPONSE_TIMEOUT": 1200000,
+  "MAX_ITERATIONS": 150,
+  "STABLE_DELAY": 3000
+}</code></pre>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

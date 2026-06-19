@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forge Agent — Autonomous AI Coding via Browser Automation</title>
+  <meta name="description" content="Forge Agent is a free, autonomous AI coding agent that drives web-based AI assistants without an API key.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v2.0.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="release-banner">
+          🎉 v2.0.0 Released — 50 days, 37+ tools, 1200+ tests.
+          <a href="blog/launch.html">Read the launch post →</a>
+        </div>
+        <section class="hero">
+          <h1>🔨 Forge Agent</h1>
+          <p class="tagline">Autonomous AI Coding — No API Key Needed</p>
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <a href="getting-started.html" class="cta-btn" style="background: var(--accent-color); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: bold; text-decoration: none;">Get Started →</a>
+            <a href="https://github.com/Omar-Azam/forge-agent" class="cta-btn" style="background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: bold; text-decoration: none;">View on GitHub</a>
+          </div>
+        </section>
+
+        <div class="stats-bar" style="display: flex; justify-content: space-between; margin: 3rem 0; padding: 1.5rem; background: var(--surface-color); border-radius: 8px; border: 1px solid var(--border-color);">
+          <span><strong>37+</strong> Tools</span>
+          <span><strong>1200+</strong> Tests</span>
+          <span><strong>50</strong> Days Built</span>
+          <span><strong>Free Forever</strong></span>
+        </div>
+
+        <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🌐 No API Key Required</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Drives DeepSeek, ChatGPT, or Gemini's free web UI via browser automation.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🤖 Fully Autonomous</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Reads files, writes code, runs commands, runs tests. Loops until done.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🎭 Agent Profiles</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Pre-configured modes for backend, frontend, data-science, and devops.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>📋 Task Templates</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">10 built-in templates. Add TypeScript, Jest, Docker in one command.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>💾 Persistent Memory</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Remembers your project's tech stack and past tasks between sessions.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🔄 Session Resume</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Pick up where you left off. Never lose progress on a stopped task.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>👁 Watch Mode</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Auto re-run on file changes. Perfect for test-fix loops.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🔌 Custom Plugins</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Drop a .js file to add any tool you need.</p>
+          </div>
+          <div class="feature-card" style="padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px;">
+            <h3>🔒 Security Sandbox</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">SSH keys and AWS credentials are always protected.</p>
+          </div>
+        </div>
+
+        <h2 id="installation">Installation</h2>
+        <pre><code>npm install -g @omar-azam/forge-agent@2.0.0
+
+# First time setup
+forge-agent --setup
+
+# Run your first task
+forge-agent "build a REST API with Express"</code></pre>
+
+        <h2 id="how-it-works">How it works</h2>
+        <div class="how-it-works-steps" style="margin-top: 1.5rem;">
+          <p>1. 📝 You give Forge Agent a task in plain English</p>
+          <p>2. 🌐 It opens the AI website in a browser automatically</p>
+          <p>3. 🔧 Receives tool calls (write file, run command, etc.)</p>
+          <p>4. ⚡ Executes them on your machine</p>
+          <p>5. 🔄 Feeds results back and repeats until done</p>
+        </div>
+
+        <section class="popular-examples" style="margin-top: 4rem;">
+          <h2 id="popular-examples">🗂 Popular Example Projects</h2>
+          <p>Curated project blueprints ready to run with one command.</p>
+
+          <div class="examples-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 2rem;">
+            <!-- Express API -->
+            <div class="example-card">
+              <div class="card-header">
+                <span class="badge-cat backend">Backend</span>
+                <span class="badge-diff intermediate">Intermediate</span>
+              </div>
+              <h3>Express REST API with JWT Auth</h3>
+              <p>Production-ready REST API with JWT authentication and PostgreSQL.</p>
+              <div class="card-actions">
+                <a href="examples.html" class="btn-expand" style="text-align: center; text-decoration: none;">View Prompt →</a>
+              </div>
+            </div>
+
+            <!-- React Todo -->
+            <div class="example-card">
+              <div class="card-header">
+                <span class="badge-cat frontend">Frontend</span>
+                <span class="badge-diff beginner">Beginner</span>
+              </div>
+              <h3>React Todo App</h3>
+              <p>Polished task manager built with pure React and CSS Modules.</p>
+              <div class="card-actions">
+                <a href="examples.html" class="btn-expand" style="text-align: center; text-decoration: none;">View Prompt →</a>
+              </div>
+            </div>
+
+            <!-- Docker Stack -->
+            <div class="example-card">
+              <div class="card-header">
+                <span class="badge-cat devops">DevOps</span>
+                <span class="badge-diff intermediate">Intermediate</span>
+              </div>
+              <h3>Docker Compose Stack</h3>
+              <p>Full development stack with Node.js, Postgres, Redis, and Nginx.</p>
+              <div class="card-actions">
+                <a href="examples.html" class="btn-expand" style="text-align: center; text-decoration: none;">View Prompt →</a>
+              </div>
+            </div>
+
+            <!-- FastAPI -->
+            <div class="example-card">
+              <div class="card-header">
+                <span class="badge-cat backend">Backend</span>
+                <span class="badge-diff intermediate">Intermediate</span>
+              </div>
+              <h3>FastAPI with SQLAlchemy</h3>
+              <p>High-performance Python API with async database access.</p>
+              <div class="card-actions">
+                <a href="examples.html" class="btn-expand" style="text-align: center; text-decoration: none;">View Prompt →</a>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 2rem;">
+            <a href="examples.html" class="cta-btn" style="background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: bold; text-decoration: none;">View All 10 Examples →</a>
+          </div>
+        </section>
+
+        <h2 id="installation">Installation</h2>
+
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <section class="blog-preview" style="margin-top: 4rem;">
+    <h2>📰 Latest from the Blog</h2>
+    <div class="blog-cards">
+      <a href="blog/launch.html" class="blog-card">
+        <span class="blog-date">June 11, 2026</span>
+        <h3>Introducing Forge Agent</h3>
+        <p>Autonomous AI coding with no API key. Here's how it works.</p>
+        <span class="read-more">Read post →</span>
+      </a>
+      <a href="blog/roadmap-2026.html" class="blog-card">
+        <span class="blog-date">June 11, 2026</span>
+        <h3>Roadmap: What's Coming in 2026</h3>
+        <p>Multi-agent, GUI desktop app, local models, and more.</p>
+        <span class="read-more">Read post →</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+
+    <p>Forge Agent v2.0.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

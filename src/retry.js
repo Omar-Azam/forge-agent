@@ -1,4 +1,4 @@
-// src/retry.js — Exponential backoff retry system for DeepSeek Agent
+// src/retry.js — Exponential backoff retry system for Forge Agent
 'use strict';
 
 const logger = require('./logger');
@@ -51,10 +51,12 @@ async function withRetry(fn, options = {}, label = 'operation') {
         opts.maxDelayMs
       );
 
-      logger.warn(
-        `${label} failed (attempt ${attempt}/${opts.maxAttempts}): ${err.message.slice(0, 80)}`
-      );
-      logger.dim(`Retrying in ${(delay / 1000).toFixed(1)}s...`);
+      if (process.env.NODE_ENV !== 'test') {
+        logger.warn(
+          `${label} failed (attempt ${attempt}/${opts.maxAttempts}): ${err.message.slice(0, 80)}`
+        );
+        logger.dim(`Retrying in ${(delay / 1000).toFixed(1)}s...`);
+      }
 
       await sleep(delay);
     }
@@ -103,7 +105,7 @@ async function withResponseRetry(fn, label = 'wait for response') {
   return withRetry(fn, {
     maxAttempts : 3,
     baseDelayMs : 3_000,
-    maxDelayMs  : 30_000,
+    maxDelayMs  : 20_000,
     factor      : 2,
     jitterMs    : 1_000,
   }, label);

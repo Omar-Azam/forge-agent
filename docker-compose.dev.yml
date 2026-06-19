@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  forge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: playwright   # stop before final stage for dev
+    volumes:
+      - .:/app
+      - /app/node_modules   # prevent host node_modules from overriding
+      - .:/workspace
+      - forge-dev-data:/root/.deepseek-agent
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+      - HEADLESS=true
+    network_mode: host
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    entrypoint: ["node", "/app/src/index.js"]
+    command: ["--help"]
+
+volumes:
+  forge-dev-data:
+    name: forge-agent-dev-data

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker for isolated, zero-installation execution.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link active">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Docker Guide</h1>
+        
+        <p>Forge Agent provides first-class Docker support, allowing you to run the agent in an isolated environment without needing to install Node.js or Playwright on your host machine.</p>
+
+        <h2 id="quick-start">Quick Start</h2>
+        <pre><code>docker pull ghcr.io/omar-azam/forge-agent:latest
+docker run --rm -v "$(pwd):/workspace" --network host \
+  ghcr.io/omar-azam/forge-agent "build a REST API"</code></pre>
+
+        <h2 id="why-docker">Why Use Docker?</h2>
+        <ul>
+          <li><strong>Zero Installation:</strong> No Node.js or Playwright setup required.</li>
+          <li><strong>Isolation:</strong> Chromium and its dependencies stay inside the container.</li>
+          <li><strong>Consistency:</strong> The same environment on your laptop, CI, and cloud.</li>
+          <li><strong>Portability:</strong> Works anywhere Docker runs.</li>
+        </ul>
+
+        <h2 id="installation">Installation Options</h2>
+
+        <h3>Option 1: Pull from GitHub Container Registry</h3>
+        <pre><code>docker pull ghcr.io/omar-azam/forge-agent:latest
+docker tag ghcr.io/omar-azam/forge-agent:latest forge-agent:latest</code></pre>
+
+        <h3>Option 2: Build Locally</h3>
+        <pre><code>git clone https://github.com/Omar-Azam/forge-agent
+cd forge-agent
+docker build -t forge-agent .
+# Or using the Makefile:
+make build</code></pre>
+
+        <h2 id="usage">Usage</h2>
+
+        <h3>Single Task</h3>
+        <pre><code>docker run --rm \
+  -v "$(pwd):/workspace" \
+  --network host \
+  forge-agent "build a REST API with Express"</code></pre>
+
+        <h3>Interactive Mode</h3>
+        <pre><code>docker run --rm -it \
+  -v "$(pwd):/workspace" \
+  --network host \
+  forge-agent --interactive</code></pre>
+
+        <h3>With Makefile (Easiest)</h3>
+        <pre><code>make run TASK="build a REST API"
+make interactive</code></pre>
+
+        <h3>With Docker Compose</h3>
+        <pre><code>docker-compose run --rm forge-agent "build a REST API"
+docker-compose run --rm -T forge-agent --interactive</code></pre>
+
+        <h2 id="persistence">Persistent Sessions (Login)</h2>
+        <p>Forge Agent stores browser sessions and memory in a volume to persist them across container runs.</p>
+        <p><strong>The Login Problem:</strong> In headless Docker, you cannot see the browser to log in. To solve this, you can use X11 forwarding for the first run to log in visually.</p>
+
+        <h3>First-time Setup (Login)</h3>
+        <pre><code># With X11 forwarding (Linux)
+docker run --rm -it \
+  -v "$(pwd):/workspace" \
+  -v forge-agent-data:/root/.deepseek-agent \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  --network host \
+  forge-agent --interactive</code></pre>
+        <p>Log in to DeepSeek in the browser window that opens. Your session will be saved to the <code>forge-agent-data</code> volume.</p>
+
+        <h3>Subsequent Runs</h3>
+        <pre><code>docker run --rm -it \
+  -v "$(pwd):/workspace" \
+  -v forge-agent-data:/root/.deepseek-agent \
+  --network host \
+  forge-agent "your task"</code></pre>
+
+        <h2 id="env-vars">Environment Variables</h2>
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>HEADLESS</code></td><td>true</td><td>Run browser headlessly</td></tr>
+            <tr><td><code>NO_TUI</code></td><td>false</td><td>Disable enhanced TUI</td></tr>
+            <tr><td><code>DEBUG</code></td><td>false</td><td>Verbose debug output</td></tr>
+            <tr><td><code>MODEL</code></td><td>deepseek</td><td>AI model to use</td></tr>
+            <tr><td><code>MAX_ITERATIONS</code></td><td>100</td><td>Max task steps</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="cicd">CI/CD Integration</h2>
+
+        <h3>GitHub Actions</h3>
+        <pre><code>- name: Run Forge Agent
+  uses: docker://ghcr.io/omar-azam/forge-agent:latest
+  with:
+    args: --format=json --output=result.json "generate API documentation"</code></pre>
+
+        <h3>GitLab CI</h3>
+        <pre><code>forge-task:
+  image: ghcr.io/omar-azam/forge-agent:latest
+  script:
+    - forge-agent "run all tests and fix failures"</code></pre>
+
+        <h2 id="custom-images">Building Your Own Image</h2>
+        <p>You can extend the Forge Agent image to include your own tools and configurations:</p>
+        <pre><code>FROM ghcr.io/omar-azam/forge-agent:latest
+COPY my-plugin.js /root/.deepseek-agent/tools/</code></pre>
+
+        <h2 id="troubleshooting">Troubleshooting</h2>
+        <ul>
+          <li><strong>Browser fails to start:</strong> Ensure you are using <code>--network host</code>.</li>
+          <li><strong>Cannot reach DeepSeek:</strong> Check your firewall settings for outbound connections.</li>
+          <li><strong>Permission errors:</strong> If the agent cannot write to <code>/workspace</code>, try using the <code>--user</code> flag with your UID/GID.</li>
+          <li><strong>Session not persisting:</strong> Verify that the volume mount for <code>/root/.deepseek-agent</code> is correct.</li>
+        </ul>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

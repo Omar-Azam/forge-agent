@@ -1,0 +1,55 @@
+name: Share a Plugin
+description: Share a custom plugin you have built with the community
+title: "[Plugin] "
+labels: ["plugin", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share your plugin with the community! Good plugins may be
+        featured in the documentation or added as built-in tools.
+
+  - type: input
+    id: plugin_name
+    attributes:
+      label: Plugin name
+      placeholder: fetch_weather
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it do?
+      placeholder: Fetches current weather for a city using wttr.in
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Plugin code
+      render: javascript
+    validations:
+      required: true
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: Example usage
+      description: Show how the AI would use this plugin.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Plugin checklist
+      options:
+        - label: Plugin works with forge-agent --list-plugins showing no errors
+          required: true
+        - label: Plugin name uses only lowercase letters and underscores
+          required: true
+        - label: Plugin does not require an API key
+          required: false
+        - label: Plugin works on Linux, macOS, and Windows
+          required: false

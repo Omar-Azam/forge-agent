@@ -1,0 +1,14 @@
+node_modules/
+.git/
+coverage/
+docs/
+tests/
+*.test.js
+.nyc_output/
+*.log
+.env
+.env.*
+!.env.example
+deepseek-agent.config.json
+forge-agent.config.json
+/tmp/

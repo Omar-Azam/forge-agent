@@ -1,0 +1,98 @@
+name: Bug Report
+description: Report something that is not working correctly
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill out all sections below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Clear description of the bug.
+      placeholder: When I run forge-agent --interactive and type a task, it...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps to reproduce the bug.
+      value: |
+        1. Run: forge-agent ...
+        2. Type: ...
+        3. See error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug_output
+    attributes:
+      label: Debug output
+      description: Run with --debug and paste output here.
+      render: shell
+      placeholder: forge-agent --debug "your task"
+
+  - type: input
+    id: version
+    attributes:
+      label: Forge Agent version
+      placeholder: "forge-agent --version"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Ubuntu / Debian
+        - Other Linux
+        - macOS
+        - Windows
+        - Windows WSL
+    validations:
+      required: true
+
+  - type: input
+    id: node_version
+    attributes:
+      label: Node.js version
+      placeholder: "node --version"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: AI model being used
+      options:
+        - deepseek (default)
+        - chatgpt
+        - gemini
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: I ran forge-agent --debug and included the output
+          required: false
+        - label: I am using the latest version of @omar-azam/forge-agent
+          required: false

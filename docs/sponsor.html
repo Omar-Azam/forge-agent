@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sponsor Forge Agent — Support Open Source</title>
+  <meta name="description" content="Support the development of Forge Agent through GitHub Sponsors, Ko-fi, or Open Collective.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sponsor-hero {
+      text-align: center;
+      padding: 4rem 1rem;
+      background: linear-gradient(135deg, var(--surface-color) 0%, #1e2533 100%);
+      border-radius: 12px;
+      margin-bottom: 3rem;
+      border: 1px solid var(--border-color);
+    }
+    .sponsor-hero h1 { margin-bottom: 1rem; color: #ff79a8; }
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .stat-card {
+      padding: 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-value { font-size: 1.8rem; font-weight: bold; color: var(--accent-color); display: block; }
+    .stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+    
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .tier-card {
+      padding: 2rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .tier-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+    .tier-card.featured { border: 2px solid #ff79a8; position: relative; }
+    .tier-card.featured::before {
+      content: "RECOMMENDED";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff79a8;
+      color: white;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+    .tier-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .tier-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+    .tier-amount { font-size: 1.2rem; color: var(--accent-color); margin-bottom: 1rem; }
+    .tier-description { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; flex-grow: 1; }
+    .tier-perks { list-style: none; padding: 0; margin: 0 0 2rem 0; font-size: 0.85rem; }
+    .tier-perks li { margin-bottom: 0.5rem; display: flex; align-items: center; }
+    .tier-perks li::before { content: "✓"; color: #4caf50; margin-right: 10px; font-weight: bold; }
+    
+    .btn-sponsor {
+      display: block;
+      padding: 0.8rem;
+      text-align: center;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn-sponsor:hover { opacity: 0.9; }
+    
+    .platform-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 4rem 0;
+    }
+    .btn-gh { background: #238636; color: white; }
+    .btn-kofi { background: #ff5e5b; color: white; }
+    .btn-oc { background: #7fadf2; color: white; }
+    .btn-bmc { background: #ffdd00; color: #000; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link active sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <section class="sponsor-hero">
+          <h1>💙 Support Forge Agent</h1>
+          <p class="tagline">Help keep Forge Agent free, maintained, and growing.</p>
+        </section>
+
+        <div class="stats-bar">
+          <div class="stat-card">
+            <span class="stat-value">47+</span>
+            <span class="stat-label">Days Built</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">37+</span>
+            <span class="stat-label">Built-in Tools</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">1130+</span>
+            <span class="stat-label">Tests Passing</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">100%</span>
+            <span class="stat-label">Free Forever</span>
+          </div>
+        </div>
+
+        <h2>Why Support?</h2>
+        <p>Forge Agent is built and maintained by one developer in their spare time. Your sponsorship directly funds:</p>
+        <ul>
+          <li>🔧 <strong>New tools and features:</strong> More ways to automate your workflow.</li>
+          <li>🐛 <strong>Bug fixes and reliability:</strong> Keeping the agent stable across AI updates.</li>
+          <li>📚 <strong>Documentation and examples:</strong> Making it easier for everyone to get started.</li>
+          <li>🔒 <strong>Security audits:</strong> Ensuring the agent remains safe to use.</li>
+          <li>⚡ <strong>Performance improvements:</strong> Making the agent faster and more efficient.</li>
+          <li>💬 <strong>Community support:</strong> Helping users in issues and discussions.</li>
+        </ul>
+
+        <h2>Sponsorship Tiers</h2>
+        <div class="tiers-grid">
+          <!-- Coffee -->
+          <div class="tier-card">
+            <div class="tier-icon">☕</div>
+            <div class="tier-name">Coffee</div>
+            <div class="tier-amount">$5 / month</div>
+            <div class="tier-description">Buy the maintainer a coffee. A simple way to say thanks.</div>
+            <ul class="tier-perks">
+              <li>Name in SUPPORTERS.md</li>
+              <li>Thank you in release notes</li>
+            </ul>
+            <a href="https://github.com/sponsors/Omar-Azam" class="btn-sponsor btn-gh">Become a Supporter</a>
+          </div>
+
+          <!-- Supporter -->
+          <div class="tier-card">
+            <div class="tier-icon">⭐</div>
+            <div class="tier-name">Supporter</div>
+            <div class="tier-amount">$10 / month</div>
+            <div class="tier-description">Support ongoing development and help pay for infrastructure.</div>
+            <ul class="tier-perks">
+              <li>All Coffee perks</li>
+              <li>Priority issue response</li>
+              <li>Supporter badge in discussions</li>
+            </ul>
+            <a href="https://github.com/sponsors/Omar-Azam" class="btn-sponsor btn-gh">Become a Supporter</a>
+          </div>
+
+          <!-- Builder -->
+          <div class="tier-card">
+            <div class="tier-icon">🔧</div>
+            <div class="tier-name">Builder</div>
+            <div class="tier-amount">$25 / month</div>
+            <div class="tier-description">Help fund new features and major architectural upgrades.</div>
+            <ul class="tier-perks">
+              <li>All Supporter perks</li>
+              <li>Vote on roadmap items</li>
+              <li>Monthly dev update email</li>
+            </ul>
+            <a href="https://github.com/sponsors/Omar-Azam" class="btn-sponsor btn-gh">Become a Builder</a>
+          </div>
+
+          <!-- Team -->
+          <div class="tier-card featured">
+            <div class="tier-icon">🏢</div>
+            <div class="tier-name">Team</div>
+            <div class="tier-amount">$100 / month</div>
+            <div class="tier-description">For teams using Forge Agent to boost their productivity.</div>
+            <ul class="tier-perks">
+              <li>All Builder perks</li>
+              <li>Logo in README</li>
+              <li>Priority support channel</li>
+              <li>Custom plugin review</li>
+            </ul>
+            <a href="https://github.com/sponsors/Omar-Azam" class="btn-sponsor btn-gh">Join as a Team</a>
+          </div>
+        </div>
+
+        <div class="platform-buttons">
+          <a href="https://github.com/sponsors/Omar-Azam" class="btn-sponsor btn-gh">GitHub Sponsors</a>
+          <a href="https://ko-fi.com/forgeagent" class="btn-sponsor btn-kofi">Support on Ko-fi</a>
+          <a href="https://opencollective.com/forge-agent" class="btn-sponsor btn-oc">Open Collective</a>
+          <a href="https://buymeacoffee.com/forgeagent" class="btn-sponsor btn-bmc">Buy Me a Coffee</a>
+        </div>
+
+        <h2>Free Ways to Help</h2>
+        <p>You don't have to pay to support Forge Agent:</p>
+        <ul>
+          <li>⭐ <strong>Star the repo:</strong> Helps others discover the project. <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a></li>
+          <li>📢 <strong>Share it:</strong> Tell your team or post on social media.</li>
+          <li>🐛 <strong>Report bugs:</strong> Good bug reports make the project better. <a href="https://github.com/Omar-Azam/forge-agent/issues">Issues</a></li>
+          <li>📝 <strong>Improve docs:</strong> Fix typos or add examples. Open a PR!</li>
+          <li>🔌 <strong>Share plugins:</strong> Post your custom tools in <a href="https://github.com/Omar-Azam/forge-agent/discussions">Discussions</a>.</li>
+        </ul>
+
+        <h2>💙 Current Supporters</h2>
+        <p>Thank you to everyone who has supported this project.</p>
+        <p><em>Supporters are listed in our <a href="https://github.com/Omar-Azam/forge-agent/blob/main/SUPPORTERS.md">SUPPORTERS.md</a> file.</em></p>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

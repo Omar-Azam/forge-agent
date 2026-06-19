@@ -1,0 +1,35 @@
+{
+  "project": "Forge Agent",
+  "version": "2.0.0",
+  "package": "@omar-azam/forge-agent",
+  "launchDate": "2026-06-12T09:00:00Z",
+  "stats": {
+    "daysOfDevelopment": 50,
+    "tools": 38,
+    "testSuites": 49,
+    "testsTotal": 1316,
+    "cliFlags": 40,
+    "builtInTemplates": 10,
+    "helpTopics": 9,
+    "exampleProjects": 10,
+    "linesOfCode": "~10000"
+  },
+  "links": {
+    "npm": "https://www.npmjs.com/package/@omar-azam/forge-agent",
+    "github": "https://github.com/Omar-Azam/forge-agent",
+    "docs": "https://omar-azam.github.io/forge-agent",
+    "docker": "https://ghcr.io/omar-azam/forge-agent",
+    "sponsor": "https://github.com/sponsors/Omar-Azam"
+  },
+  "platforms": {
+    "productHunt": "https://www.producthunt.com/posts/forge-agent",
+    "hackerNews": "https://news.ycombinator.com",
+    "devTo": "https://dev.to",
+    "twitter": "https://twitter.com",
+    "linkedin": "https://linkedin.com"
+  },
+  "supportedModels": ["deepseek", "chatgpt", "gemini"],
+  "supportedOS": ["linux", "macos", "windows"],
+  "license": "MIT",
+  "nodeRequired": ">=18.0.0"
+}

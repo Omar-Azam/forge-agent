@@ -1,4 +1,4 @@
-// src/postinstall.js — Runs after `npm install -g deepseek-browser-agent`
+// src/postinstall.js — Runs after `npm install -g forge-agent`
 // Automatically downloads the Playwright Chromium browser.
 'use strict';
 
@@ -8,17 +8,9 @@ const os           = require('os');
 
 // Skip in CI environments where a display isn't available
 if (process.env.CI || process.env.SKIP_PLAYWRIGHT_INSTALL) {
-  console.log('[deepseek-agent] Skipping Playwright browser install (CI detected).');
+  console.log('[forge-agent] Skipping Playwright browser install (CI detected).');
   process.exit(0);
 }
-
-console.log('');
-console.log('╔══════════════════════════════════════════════════╗');
-console.log('║   🤖  DeepSeek Browser Agent — Setup             ║');
-console.log('╚══════════════════════════════════════════════════╝');
-console.log('');
-console.log('  Downloading Playwright Chromium browser...');
-console.log('  (This only happens once — ~150 MB)\n');
 
 try {
   // Use the playwright binary bundled in this package's node_modules
@@ -30,11 +22,20 @@ try {
   });
 
   console.log('');
-  console.log('  ✓ Browser installed successfully!');
+  console.log('╔══════════════════════════════════════════════════════════╗');
+  console.log('║   🔨  Forge Agent — Setup Complete                        ║');
+  console.log('╚══════════════════════════════════════════════════════════╝');
+  console.log('');
+  console.log('  ✓ Chromium browser downloaded and ready.');
   console.log('');
   console.log('  Get started:');
-  console.log('    deepseek-agent --interactive');
-  console.log('    deepseek-agent "build a REST API in Express"');
+  console.log('    forge-agent --setup');
+  console.log('    forge-agent --interactive');
+  console.log('    forge-agent "build a REST API with Express"');
+  console.log('    fa "your task"');
+  console.log('');
+  console.log('  Documentation:');
+  console.log('    https://github.com/Omar-Azam/forge-agent');
   console.log('');
 } catch (err) {
   console.warn('');

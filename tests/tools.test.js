@@ -19,7 +19,7 @@ jest.mock('../src/config', () => ({
   DEBUG            : false,
 }));
 
-const { executeTool, TOOLS } = require('../src/tools');
+const { executeTool, TOOLS, cache } = require('../src/tools');
 
 // ─────────────────────────────────────────────────────────
 //  Helpers
@@ -42,6 +42,10 @@ async function writeTemp(relPath, content) {
 
 afterAll(() => {
   fs.rmSync(TMP_DIR, { recursive: true, force: true });
+});
+
+beforeEach(() => {
+  cache.clear();
 });
 
 // ─────────────────────────────────────────────────────────
@@ -500,10 +504,10 @@ describe('read_url', () => {
     const result = await executeTool('read_url', { url: 'http://example.com' });
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(10);
-  }, 15000);
+  }, 60000);
 
   test('rejects on invalid URL', async () => {
     await expect(executeTool('read_url', { url: 'http://localhost:1' }))
       .rejects.toThrow();
-  }, 10000);
+  }, 60000);
 });

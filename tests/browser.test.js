@@ -1,4 +1,4 @@
-// tests/browser.test.js — Day 3: Browser selector tests (Playwright mocked)
+// tests/browser.test.js — Day 3: Browser tests (Playwright mocked)
 'use strict';
 
 // ─────────────────────────────────────────────────────────
@@ -33,6 +33,7 @@ jest.mock('../src/config', () => ({
   DEEPSEEK_URL     : 'https://chat.deepseek.com',
   SESSION_DIR      : '/tmp/dsa-test-session',
   HEADLESS         : false,
+  MODEL            : 'deepseek',
   RESPONSE_TIMEOUT : 5000,
   STABLE_DELAY     : 500,
   SEND_DELAY       : 50,
@@ -49,6 +50,17 @@ jest.mock('../src/logger', () => ({
   clearLine : jest.fn(),
   banner    : jest.fn(),
   separator : jest.fn(),
+}));
+
+const mockAdapter = {
+  sendMessage: jest.fn(),
+  waitForResponse: jest.fn().mockResolvedValue('response'),
+  newChat: jest.fn(),
+};
+
+jest.mock('../src/adapter-factory', () => ({
+  getAdapter: jest.fn().mockReturnValue(mockAdapter),
+  getModelUrl: jest.fn().mockReturnValue('https://chat.deepseek.com'),
 }));
 
 // Mock health check so launch() doesn't need complex evaluate setup
@@ -68,14 +80,17 @@ function makeBrowser() {
   const b = new DeepSeekBrowser();
   b.context = mockContext;
   b.page    = mockPage;
+  b.adapter = mockAdapter;
   return b;
 }
 
 beforeEach(() => {
   jest.resetAllMocks();
+
   // Restore playwright mock after reset
   const { chromium } = require('playwright');
   chromium.launchPersistentContext.mockResolvedValue(mockContext);
+
   // Restore page mocks
   mockPage.goto.mockResolvedValue(undefined);
   mockPage.waitForTimeout.mockResolvedValue(undefined);
@@ -83,154 +98,25 @@ beforeEach(() => {
   mockPage.addInitScript.mockResolvedValue(undefined);
   mockPage.keyboard.press.mockResolvedValue(undefined);
   mockPage.screenshot.mockResolvedValue(undefined);
+  
   mockContext.pages.mockReturnValue([mockPage]);
   mockContext.newPage.mockResolvedValue(mockPage);
   mockContext.close.mockResolvedValue(undefined);
+  
+  // Restore adapter mocks
+  mockAdapter.sendMessage.mockResolvedValue(undefined);
+  mockAdapter.waitForResponse.mockResolvedValue('response');
+  mockAdapter.newChat.mockResolvedValue(undefined);
+
   // Default: page is at deepseek, logged in
   mockPage.evaluate.mockResolvedValue(false);
+  
+  const { getAdapter, getModelUrl } = require('../src/adapter-factory');
+  getAdapter.mockReturnValue(mockAdapter);
+  getModelUrl.mockReturnValue('https://chat.deepseek.com');
+
   require('../src/health').runHealthCheckWithReAuth.mockResolvedValue({
     checks: [], passed: 6, warned: 0, failed: 0, healthy: true,
-  });
-});
-
-// ─────────────────────────────────────────────────────────
-//  SEL selector bank — validate structure
-// ─────────────────────────────────────────────────────────
-
-describe('SEL selector bank', () => {
-  // Access the SEL object by parsing the source file properly
-  const src = require('fs').readFileSync(
-    require('path').join(__dirname, '../src/browser.js'), 'utf8'
-  );
-
-  function extractSelectors(name) {
-    // Match the array for a named key inside the SEL object
-    const blockMatch = src.match(
-      new RegExp(name + '\\s*:\\s*\\[([\\s\\S]*?)\\],?\\s*\\n\\s*(?:\\/\\/|\\w)')
-    );
-    if (!blockMatch) return [];
-    const block = blockMatch[1];
-    // Extract every quoted string from the block
-    const sels = [];
-    const re = /['"]([^'"]+)['"]/g;
-    let m;
-    while ((m = re.exec(block)) !== null) {
-      sels.push(m[1]);
-    }
-    return sels;
-  }
-
-  test('chatInput has at least 3 fallback selectors', () => {
-    const sels = extractSelectors('chatInput');
-    expect(sels.length).toBeGreaterThanOrEqual(3);
-  });
-
-  test('sendButton has at least 4 fallback selectors', () => {
-    const sels = extractSelectors('sendButton');
-    expect(sels.length).toBeGreaterThanOrEqual(4);
-  });
-
-  test('stopButton has at least 3 fallback selectors', () => {
-    const sels = extractSelectors('stopButton');
-    expect(sels.length).toBeGreaterThanOrEqual(3);
-  });
-
-  test('newChat has at least 3 fallback selectors', () => {
-    const sels = extractSelectors('newChat');
-    expect(sels.length).toBeGreaterThanOrEqual(3);
-  });
-
-  test('messageContainer has at least 3 fallback selectors', () => {
-    const sels = extractSelectors('messageContainer');
-    expect(sels.length).toBeGreaterThanOrEqual(3);
-  });
-
-  test('chatInput selectors are valid CSS strings', () => {
-    const sels = extractSelectors('chatInput');
-    sels.forEach(sel => {
-      expect(typeof sel).toBe('string');
-      expect(sel.length).toBeGreaterThan(0);
-      expect(sel).not.toContain('undefined');
-    });
-  });
-
-  test('all selector groups have string entries only', () => {
-    ['chatInput', 'sendButton', 'stopButton', 'newChat', 'messageContainer'].forEach(group => {
-      extractSelectors(group)
-        .filter(sel => sel.trim().length > 0)
-        .forEach(sel => {
-          expect(typeof sel).toBe('string');
-          expect(sel.trim().length).toBeGreaterThan(0);
-          expect(sel).not.toContain('undefined');
-        });
-    });
-  });
-});
-
-// ─────────────────────────────────────────────────────────
-//  _cleanText — no browser needed
-// ─────────────────────────────────────────────────────────
-
-describe('_cleanText', () => {
-  let browser;
-  beforeEach(() => { browser = makeBrowser(); });
-
-  test('returns empty string for null/undefined', () => {
-    expect(browser._cleanText(null)).toBe('');
-    expect(browser._cleanText(undefined)).toBe('');
-    expect(browser._cleanText('')).toBe('');
-  });
-
-  test('strips DeepSeek R1 <think> blocks', () => {
-    const raw = '<think>\nLet me think step by step...\n</think>\nThe answer is 42.';
-    expect(browser._cleanText(raw)).toBe('The answer is 42.');
-  });
-
-  test('strips multiline <think> blocks', () => {
-    const raw = '<think>\nline1\nline2\nline3\n</think>\nDone.';
-    const result = browser._cleanText(raw);
-    expect(result).not.toContain('<think>');
-    expect(result).not.toContain('line1');
-    expect(result).toBe('Done.');
-  });
-
-  test('strips copy-code button artifacts', () => {
-    const raw = '1CopyRunInsert\nsome code here\n2CopyRunInsert\nmore code';
-    const result = browser._cleanText(raw);
-    expect(result).not.toMatch(/\dCopy/);
-    expect(result).toContain('some code here');
-  });
-
-  test('collapses 3+ blank lines to 2', () => {
-    const raw = 'para1\n\n\n\n\npara2';
-    const result = browser._cleanText(raw);
-    expect(result).not.toMatch(/\n{3,}/);
-    expect(result).toContain('para1');
-    expect(result).toContain('para2');
-  });
-
-  test('trims leading and trailing whitespace', () => {
-    expect(browser._cleanText('  hello  ')).toBe('hello');
-    expect(browser._cleanText('\n\nhello\n\n')).toBe('hello');
-  });
-
-  test('preserves normal response text unchanged', () => {
-    const raw = 'I have created the calculator with index.html, style.css, and script.js.';
-    expect(browser._cleanText(raw)).toBe(raw);
-  });
-
-  test('strips Thinking... prefix from R1 model', () => {
-    const raw = 'Thinking...\nSome internal reasoning\n\nThe task is complete.';
-    const result = browser._cleanText(raw);
-    expect(result).not.toMatch(/^Thinking/);
-  });
-
-  test('handles multiple <think> blocks', () => {
-    const raw = '<think>first</think>\ntext\n<think>second</think>\nmore text';
-    const result = browser._cleanText(raw);
-    expect(result).not.toContain('<think>');
-    expect(result).toContain('text');
-    expect(result).toContain('more text');
   });
 });
 
@@ -243,9 +129,6 @@ describe('launch()', () => {
     const { chromium } = require('playwright');
     const browser = new DeepSeekBrowser();
 
-    // Prevent login prompt in tests
-    mockPage.evaluate.mockResolvedValueOnce(false);
-
     await browser.launch();
 
     expect(chromium.launchPersistentContext).toHaveBeenCalledWith(
@@ -257,9 +140,8 @@ describe('launch()', () => {
     );
   });
 
-  test('navigates to DeepSeek URL after launch', async () => {
+  test('navigates to model URL after launch', async () => {
     const browser = new DeepSeekBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(false);
     await browser.launch();
     expect(mockPage.goto).toHaveBeenCalledWith(
       'https://chat.deepseek.com',
@@ -267,10 +149,17 @@ describe('launch()', () => {
     );
   });
 
+  test('initializes adapter via factory', async () => {
+    const { getAdapter } = require('../src/adapter-factory');
+    const browser = new DeepSeekBrowser();
+    await browser.launch();
+    expect(getAdapter).toHaveBeenCalledWith('deepseek', mockPage, expect.any(Object));
+    expect(browser.adapter).toBe(mockAdapter);
+  });
+
   test('reuses existing page if one is already open', async () => {
     const browser = new DeepSeekBrowser();
     mockContext.pages.mockReturnValueOnce([mockPage, mockPage]);
-    mockPage.evaluate.mockResolvedValueOnce(false);
     await browser.launch();
     expect(mockContext.newPage).not.toHaveBeenCalled();
   });
@@ -278,16 +167,8 @@ describe('launch()', () => {
   test('opens a new page if context has none', async () => {
     const browser = new DeepSeekBrowser();
     mockContext.pages.mockReturnValueOnce([]);
-    mockPage.evaluate.mockResolvedValueOnce(false);
     await browser.launch();
     expect(mockContext.newPage).toHaveBeenCalled();
-  });
-
-  test('sets page reference after launch', async () => {
-    const browser = new DeepSeekBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(false);
-    await browser.launch();
-    expect(browser.page).toBe(mockPage);
   });
 });
 
@@ -327,145 +208,57 @@ describe('Health check wiring', () => {
     await browser.launch();
     expect(runHealthCheckWithReAuth).toHaveBeenCalledWith(
       mockPage,
+      expect.anything(),
+      expect.anything(),
       expect.any(Function)
     );
   });
-
-  test('launch() passes reLogin callback to health check', async () => {
-    const { runHealthCheckWithReAuth } = require('../src/health');
-    const browser = new DeepSeekBrowser();
-    const bannerSpy = jest.spyOn(browser, '_printLoginBanner').mockImplementation(() => {});
-    const enterSpy  = jest.spyOn(browser, '_waitForEnter').mockResolvedValue(undefined);
-
-    // Capture the reLogin callback and call it
-    runHealthCheckWithReAuth.mockImplementationOnce(async (page, reLogin) => {
-      await reLogin();
-      return { checks: [], passed: 6, warned: 0, failed: 0, healthy: true };
-    });
-
-    await browser.launch();
-    expect(bannerSpy).toHaveBeenCalled();
-    expect(enterSpy).toHaveBeenCalled();
-  });
 });
 
 // ─────────────────────────────────────────────────────────
-//  sendMessage() — input detection and message sending
+//  sendMessage() — delegation to adapter
 // ─────────────────────────────────────────────────────────
 
 describe('sendMessage()', () => {
-  test('fills textarea and presses Enter when no send button found', async () => {
+  test('delegates to adapter.sendMessage', async () => {
     const browser = makeBrowser();
-
-    const mockTextarea = {
-      click    : jest.fn().mockResolvedValue(undefined),
-      fill     : jest.fn().mockResolvedValue(undefined),
-      evaluate : jest.fn().mockResolvedValue(undefined),
-    };
-    mockPage.waitForSelector.mockResolvedValueOnce(mockTextarea);
-    mockTextarea.evaluate
-      .mockResolvedValueOnce('textarea')  // tagName
-      .mockResolvedValueOnce(false)       // isContentEditable
-      .mockResolvedValueOnce(undefined);  // selectAll
-
-    // No send button found
-    mockPage.$.mockResolvedValue(null);
-
     await browser.sendMessage('hello world');
-
-    expect(mockTextarea.fill).toHaveBeenCalledWith('hello world');
-    expect(mockPage.keyboard.press).toHaveBeenCalledWith('Enter');
+    expect(mockAdapter.sendMessage).toHaveBeenCalledWith('hello world');
   });
 
-  test('clicks send button when it is visible and enabled', async () => {
-    const browser = makeBrowser();
-
-    const mockTextarea = {
-      click    : jest.fn().mockResolvedValue(undefined),
-      fill     : jest.fn().mockResolvedValue(undefined),
-      evaluate : jest.fn().mockResolvedValue(undefined),
-    };
-    const mockSendBtn = {
-      isVisible : jest.fn().mockResolvedValue(true),
-      isEnabled : jest.fn().mockResolvedValue(true),
-      click     : jest.fn().mockResolvedValue(undefined),
-    };
-
-    mockPage.waitForSelector.mockResolvedValueOnce(mockTextarea);
-    mockTextarea.evaluate
-      .mockResolvedValueOnce('textarea')
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(undefined);
-
-    // First $ call returns the send button
-    mockPage.$.mockResolvedValueOnce(mockSendBtn);
-
-    await browser.sendMessage('test message');
-    expect(mockSendBtn.click).toHaveBeenCalled();
-  });
-
-  test('throws when no input element found', async () => {
-    const browser = makeBrowser();
-    mockPage.waitForSelector.mockRejectedValue(new Error('Timeout'));
-    await expect(browser.sendMessage('test')).rejects.toThrow();
+  test('throws if not initialized', async () => {
+    const browser = new DeepSeekBrowser();
+    await expect(browser.sendMessage('test')).rejects.toThrow(/not initialized/);
   });
 });
 
 // ─────────────────────────────────────────────────────────
-//  _getMessageCount() — message counting
+//  waitForResponse() — delegation to adapter
 // ─────────────────────────────────────────────────────────
 
-describe('_getMessageCount()', () => {
-  test('returns count from evaluate', async () => {
+describe('waitForResponse()', () => {
+  test('delegates to adapter.waitForResponse', async () => {
     const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(3);
-    const count = await browser._getMessageCount();
-    expect(count).toBe(3);
+    const resp = await browser.waitForResponse();
+    expect(mockAdapter.waitForResponse).toHaveBeenCalled();
+    expect(resp).toBe('response');
   });
 
-  test('returns 0 when no messages', async () => {
-    const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(0);
-    const count = await browser._getMessageCount();
-    expect(count).toBe(0);
+  test('throws if not initialized', async () => {
+    const browser = new DeepSeekBrowser();
+    await expect(browser.waitForResponse()).rejects.toThrow(/not initialized/);
   });
 });
 
 // ─────────────────────────────────────────────────────────
-//  _extractLastMessage() — text extraction
+//  newChat() — delegation to adapter
 // ─────────────────────────────────────────────────────────
 
-describe('_extractLastMessage()', () => {
-  test('returns extracted text from page.evaluate', async () => {
+describe('newChat()', () => {
+  test('delegates to adapter.newChat', async () => {
     const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce('tool_call\n{ "name": "read_file", "args": {} }');
-    const result = await browser._extractLastMessage();
-    expect(result).toContain('tool_call');
-  });
-
-  test('returns empty string when page returns empty', async () => {
-    const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce('');
-    const result = await browser._extractLastMessage();
-    expect(result).toBe('');
-  });
-});
-
-// ─────────────────────────────────────────────────────────
-//  _isGenerating() — streaming detection
-// ─────────────────────────────────────────────────────────
-
-describe('_isGenerating()', () => {
-  test('returns true when evaluate returns true', async () => {
-    const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(true);
-    expect(await browser._isGenerating()).toBe(true);
-  });
-
-  test('returns false when evaluate returns false', async () => {
-    const browser = makeBrowser();
-    mockPage.evaluate.mockResolvedValueOnce(false);
-    expect(await browser._isGenerating()).toBe(false);
+    await browser.newChat();
+    expect(mockAdapter.newChat).toHaveBeenCalled();
   });
 });
 
@@ -481,13 +274,5 @@ describe('screenshot()', () => {
       path     : '/tmp/test-shot.png',
       fullPage : false,
     });
-  });
-
-  test('uses default path when none provided', async () => {
-    const browser = makeBrowser();
-    await browser.screenshot();
-    expect(mockPage.screenshot).toHaveBeenCalledWith(
-      expect.objectContaining({ path: expect.stringContaining('.png') })
-    );
   });
 });

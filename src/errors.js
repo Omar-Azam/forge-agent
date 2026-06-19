@@ -1,4 +1,4 @@
-// src/errors.js — Structured error system for DeepSeek Agent
+// src/errors.js — Structured error system for Forge Agent
 //
 // Every error the user sees follows a consistent structure:
 //   WHAT:  what operation failed
@@ -214,7 +214,7 @@ const Errors = {
     );
   },
 
-  // ── Browser / DeepSeek errors ─────────────────────────────────────────────
+  // ── Browser / AI errors ─────────────────────────────────────────────
 
   browserLaunchFailed(cause) {
     return new AgentError(
@@ -232,11 +232,11 @@ const Errors = {
 
   inputNotFound() {
     return new AgentError(
-      'Cannot find the DeepSeek chat input box',
-      "DeepSeek's UI may have changed or the page did not load correctly.",
+      'Cannot find the AI chat input box',
+      "The AI's UI may have changed or the page did not load correctly.",
       [
-        'Run: deepseek-agent --calibrate  to auto-detect new selectors',
-        'Make sure you are logged in to DeepSeek',
+        'Run: forge-agent --calibrate  to auto-detect new selectors',
+        'Make sure you are logged in to the AI',
         'Try refreshing the browser window manually',
         'Check your internet connection',
       ]
@@ -245,11 +245,11 @@ const Errors = {
 
   loginRequired() {
     return new AgentError(
-      'DeepSeek login required',
+      'AI login required',
       'Your session has expired or you have not logged in yet.',
       [
         'Run without --headless so the browser window opens',
-        'Log in to chat.deepseek.com in the browser window',
+        'Log in to the AI in the browser window',
         'Press Enter in the terminal to continue',
         'Your session will be saved for future runs',
       ]
@@ -259,11 +259,11 @@ const Errors = {
   responseTimeout(timeoutMs) {
     return new AgentError(
       `No response received after ${timeoutMs / 1000}s`,
-      'DeepSeek did not respond within the timeout period.',
+      'The AI did not respond within the timeout period.',
       [
         `Increase timeout in config: { "RESPONSE_TIMEOUT": ${timeoutMs * 2} }`,
         'Check your internet connection',
-        'DeepSeek may be experiencing high load — try again shortly',
+        'The AI service may be experiencing high load — try again shortly',
         'Try starting a new chat: type "new" in interactive mode',
       ]
     );
@@ -271,10 +271,10 @@ const Errors = {
 
   emptyResponse() {
     return new AgentError(
-      'Received an empty response from DeepSeek',
-      'DeepSeek returned no text — the message may not have been sent.',
+      'Received an empty response from the AI',
+      'The AI returned no text — the message may not have been sent.',
       [
-        'Run: deepseek-agent --calibrate  to check selector health',
+        'Run: forge-agent --calibrate  to check selector health',
         'Increase STABLE_DELAY in config to wait longer for streaming',
         'Try starting a new chat session',
       ]
@@ -426,6 +426,7 @@ function classifyCommandError(err, command) {
  * Accepts AgentError or plain Error.
  */
 function displayError(err) {
+  if (!err) return;
   if (err instanceof AgentError) {
     process.stderr.write(err.format());
   } else {

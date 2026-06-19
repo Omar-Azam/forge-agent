@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Benchmarks — Forge Agent</title>
+  <meta name="description" content="Measure and track the performance of Forge Agent logic layers.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="benchmarks.html" class="nav-link active">Benchmarks</a>
+        
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>🚀 Performance Benchmarks</h1>
+        <p>Forge Agent includes a built-in benchmarking suite to measure the performance and reliability of its core logic layers. This helps ensure that new features don't introduce performance regressions.</p>
+
+        <div class="note">
+          <strong>Note:</strong> These benchmarks measure the agent's internal logic (parsing, tools, search) in isolation. They do <strong>not</strong> include AI response latency or browser automation time, as those depend on external factors like network speed and AI provider load.
+        </div>
+
+        <h2 id="what-measures">What the Benchmarks Measure</h2>
+        <p>The suite is divided into five main categories:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Measures</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Parser</strong></td>
+              <td>JSON extraction, thinking block removal, and recovery from malformed output.</td>
+            </tr>
+            <tr>
+              <td><strong>Tools</strong></td>
+              <td>Execution time of core tools like <code>read_file</code>, <code>write_file</code>, and <code>run_command</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Search</strong></td>
+              <td>Fuzzy matching speed, symbol extraction (AST-like parsing), and codebase-wide search efficiency.</td>
+            </tr>
+            <tr>
+              <td><strong>Truncation</strong></td>
+              <td>Speed of the smart truncation system when handling large code blocks or test outputs.</td>
+            </tr>
+            <tr>
+              <td><strong>Memory</strong></td>
+              <td>Retrieval and formatting of project memory and task history.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="running">Running Benchmarks</h2>
+        <p>You can run benchmarks directly from the CLI:</p>
+        <pre><code># Run all benchmarks
+forge-agent --benchmark
+
+# Run only a specific category
+forge-agent --benchmark=parser
+
+# Run with more iterations for higher accuracy
+forge-agent --benchmark --benchmark-iterations=10</code></pre>
+
+        <h2 id="interpreting">Interpreting Results</h2>
+        <p>Benchmarks are compared against a <strong>baseline</strong> (expected maximum time in ms).</p>
+        <ul>
+          <li><span style="color: #2ea043">✅ <strong>PASS</strong></span>: Mean time is within the baseline.</li>
+          <li><span style="color: #d29922">⚠️ <strong>WARN</strong></span>: Mean time exceeded baseline but is within 1.5x.</li>
+          <li><span style="color: #cf222e">❌ <strong>FAIL</strong></span>: Mean time exceeded 1.5x of the baseline.</li>
+        </ul>
+
+        <h3>Comparing Reports</h3>
+        <p>You can compare your current performance against the previous run:</p>
+        <pre><code>forge-agent --benchmark-compare</code></pre>
+
+        <h2 id="sample-results">Benchmark Results (sample)</h2>
+        <p>Here is what a typical benchmark report looks like in the terminal:</p>
+        <pre style="background: #0d1117; color: #e6edf3; border: 1px solid #30363d;">
+╔══════════════════════════════════════════════════════════════════╗
+║  🔨 Forge Agent — Benchmark Report                               ║
+║  Suite: Core Performance  •  3 iterations  •  20 benchmarks      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+PARSER
+✅  parse simple tool call           0.15ms  (baseline: 5ms)
+✅  parse fenced code block          0.12ms  (baseline: 5ms)
+✅  parse with think blocks          0.45ms  (baseline: 10ms)
+
+TOOLS
+✅  read_file 200 lines              1.8ms   (baseline: 50ms)
+✅  write_file 50 lines              4.2ms   (baseline: 100ms)
+✅  list_directory 30 files          3.1ms   (baseline: 100ms)
+
+SEARCH
+✅  fuzzyMatch 500 calls             6.4ms   (baseline: 50ms)
+⚠️   searchCodebase 20 files         185ms   (baseline: 200ms) — 92% of budget
+✅  extractSymbols 500 lines         142ms   (baseline: 200ms)
+
+────────────────────────────────────────────────────────────────────
+Results: 19 passed  1 warned  0 failed
+Total time: 412ms
+────────────────────────────────────────────────────────────────────</pre>
+
+        <h2 id="ci-cd">Using in CI/CD</h2>
+        <p>Output results as JSON for automated performance tracking in GitHub Actions:</p>
+        <pre><code># In your CI workflow
+- name: Run performance benchmarks
+  run: forge-agent --benchmark-json > results.json
+
+- name: Upload benchmark results
+  uses: actions/upload-artifact@v4
+  with:
+    name: performance-report
+    path: results.json</code></pre>
+
+        <h2 id="contributing">Contributing Benchmarks</h2>
+        <p>New benchmarks can be added to <code>src/benchmarks/</code>. Each file must export a registration function:</p>
+        <pre><code>module.exports = function register(suite) {
+  suite.add('my new benchmark', async () => {
+    // code to measure
+  }, {
+    category: 'tools',
+    baseline: 50 // ms
+  });
+};</code></pre>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+        <li><a href="#what-measures">What's Measured</a></li>
+        <li><a href="#running">Running</a></li>
+        <li><a href="#interpreting">Interpreting</a></li>
+        <li><a href="#ci-cd">CI/CD Integration</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// tests/selector-health-check.js — Day 3: Live DeepSeek selector validator
+// tests/selector-health-check.js — Day 3: Live AI selector validator
 //
 // Unlike the unit tests in browser.test.js (which mock Playwright), this
-// script opens a REAL browser, loads chat.deepseek.com, and checks every
+// script opens a REAL browser, loads the AI chat page, and checks every
 // selector in the SEL bank actually finds elements on the live page.
 //
 // Run with:
@@ -88,7 +88,7 @@ const c = (code, t) => A[code] + t + A.reset;
 
 async function run() {
   console.log('');
-  console.log(c('bold', '🔬  DeepSeek Selector Health Check'));
+  console.log(c('bold', '🔬  Forge Agent — Selector Health Check'));
   console.log(c('gray', '    Validates all browser.js SEL selectors against the live page'));
   console.log('');
 
@@ -117,7 +117,7 @@ async function run() {
 
   if (needsLogin) {
     console.log('');
-    console.log(c('yellow', '  ⚠  Login required — please log in to DeepSeek in the browser window'));
+    console.log(c('yellow', '  ⚠  Login required — please log in to the AI in the browser window'));
     console.log(c('yellow', '     then press ENTER here to continue the health check...'));
     console.log('');
     await waitForEnter();
@@ -185,20 +185,20 @@ async function run() {
   if (brokenCritical.length > 0) {
     console.log('');
     console.log(c('red', '  ✗ CRITICAL SELECTORS BROKEN: ' + brokenCritical.join(', ')));
-    console.log(c('yellow', '  → Run: node src/calibrate.js'));
+    console.log(c('yellow', '  → Run: forge-agent --calibrate'));
     console.log(c('yellow', '    to auto-detect the new selectors and update src/browser.js\n'));
   } else if (anyFail) {
     console.log('');
     console.log(c('yellow', '  ⚠ Some non-critical selectors are broken.'));
     console.log(c('yellow', '    The agent will still work but with reduced reliability.'));
-    console.log(c('yellow', '    Consider running: node src/calibrate.js\n'));
+    console.log(c('yellow', '    Consider running: forge-agent --calibrate\n'));
   } else {
     console.log('');
     console.log(c('green', '  ✓ All selectors healthy — agent is ready to use!\n'));
   }
 
   // ── Save report ─────────────────────────────────────────────────────────
-  const reportPath = path.join(os.tmpdir(), 'dsa-selector-health.json');
+  const reportPath = path.join(os.tmpdir(), 'forge-selector-health.json');
   const report = {
     timestamp : new Date().toISOString(),
     url       : await page.evaluate(() => window.location.href),

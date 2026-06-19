@@ -142,11 +142,7 @@ class ProgressTracker {
     lines.push('TO RESUME: Run the agent again with the same task.');
     lines.push('           The files created above are saved to disk.');
 
-    if (reason === 'max_iterations') {
-      lines.push('           Consider increasing MAX_ITERATIONS in your config.');
-    } else {
-      lines.push('           Consider increasing RESPONSE_TIMEOUT in your config.');
-    }
+    lines.push('           Consider increasing RESPONSE_TIMEOUT in your config.');
 
     return lines.join('\n');
   }

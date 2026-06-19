@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLI Reference — Forge Agent</title>
+  <meta name="description" content="Complete command line interface reference for Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" id="global-search" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>CLI Reference</h1>
+        <p>Forge Agent provides over 40 command-line flags for fine-grained control over the agent's behavior.</p>
+        
+        <input type="text" id="flag-search" placeholder="Search flags..." style="width: 100%; padding: 0.8rem; margin-bottom: 2rem; background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px;">
+
+        <div id="flag-list">
+          <h2 id="core-options">Core Options</h2>
+          <div class="flag-card">
+            <h3><code>--interactive</code>, <code>-i</code></h3>
+            <p>Start interactive REPL mode where you can run multiple tasks in a shared AI context.</p>
+            <pre><code>forge-agent --interactive</code></pre>
+          </div>
+
+          <div class="flag-card">
+            <h3><code>--dir &lt;path&gt;</code>, <code>-d</code></h3>
+            <p>Set the working directory for the agent (default: current directory).</p>
+            <pre><code>forge-agent --dir ~/projects/my-app "add a readme"</code></pre>
+          </div>
+
+          <div class="flag-card">
+            <h3><code>--model &lt;name&gt;</code>, <code>-m</code></h3>
+            <p>Specify the AI model to use. Options: <code>deepseek</code>, <code>chatgpt</code>, <code>gemini</code>.</p>
+            <pre><code>forge-agent --model=chatgpt "write a blog post"</code></pre>
+          </div>
+
+          <div class="flag-card">
+            <h3><code>--profile &lt;name&gt;</code></h3>
+            <p>Activate a pre-configured agent profile.</p>
+            <pre><code>forge-agent --profile=backend "add auth"</code></pre>
+          </div>
+
+          <div class="flag-card">
+            <h3><code>--plan</code></h3>
+            <p>Show a step-by-step execution plan before the agent starts acting.</p>
+          </div>
+
+          <div class="flag-card">
+            <h3><code>--think</code></h3>
+            <p>Display DeepSeek R1's chain-of-thought reasoning process.</p>
+          </div>
+
+          <h2 id="memory-sessions">Memory & Sessions</h2>
+          <div class="flag-card">
+            <h3><code>--resume</code></h3>
+            <p>Resume a previous task via an interactive selection list.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--resume=last</code></h3>
+            <p>Immediately resume the most recently run task.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--rerun</code></h3>
+            <p>Re-run the most recent task from scratch.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--history</code></h3>
+            <p>Browse and resume past tasks from a list.</p>
+          </div>
+
+          <h2 id="diagnostics-security">Diagnostics & Security</h2>
+          <div class="flag-card">
+            <h3><code>--benchmark</code></h3>
+            <p>Run the performance benchmark suite.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--diagnostics</code></h3>
+            <p>Generate a system report for bug debugging.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--security</code></h3>
+            <p>Show the current security posture and blocked paths.</p>
+          </div>
+
+          <h2 id="support-launch">Support & Launch</h2>
+          <div class="flag-card">
+            <h3><code>--sponsor</code></h3>
+            <p>Show sponsorship options and tiers.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--no-sponsor-nudge</code></h3>
+            <p>Disable the funding reminder for the current run.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--launch-assets</code></h3>
+            <p>Generate launch materials for social media.</p>
+          </div>
+          <div class="flag-card">
+            <h3><code>--examples</code></h3>
+            <p>Open the interactive example project gallery.</p>
+          </div>
+
+          <h2 id="templates">Templates</h2>
+          <div class="flag-card">
+            <h3><code>--template=&lt;name&gt;</code></h3>
+            <p>Run a saved task template.</p>
+          </div>
+
+          <h2 id="output-format">Output & Format</h2>
+          <div class="flag-card">
+            <h3><code>--format=&lt;name&gt;</code></h3>
+            <p>Set output format: <code>text</code>, <code>markdown</code>, <code>json</code>, <code>minimal</code>, <code>silent</code>.</p>
+          </div>
+
+          <h2 id="watch-mode">Watch Mode</h2>
+          <div class="flag-card">
+            <h3><code>--watch</code></h3>
+            <p>Watch files for changes and re-run the task automatically.</p>
+          </div>
+
+          <h2 id="performance">Performance</h2>
+          <div class="flag-card">
+            <h3><code>--max-iterations=&lt;N&gt;</code></h3>
+            <p>Maximum steps before stopping (default: 100).</p>
+          </div>
+
+          <h2 id="configuration">Configuration</h2>
+          <div class="flag-card">
+            <h3><code>--setup</code></h3>
+            <p>Run the interactive setup wizard.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+  <script>
+    document.getElementById('flag-search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('.flag-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(q) ? '' : 'none';
+      });
+      // Hide headers if no cards visible in that section
+      document.querySelectorAll('h2').forEach(header => {
+        let sibling = header.nextElementSibling;
+        let hasVisible = false;
+        while (sibling && sibling.tagName !== 'H2') {
+          if (sibling.classList.contains('flag-card') && sibling.style.display !== 'none') {
+            hasVisible = true;
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        header.style.display = hasVisible || !q ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

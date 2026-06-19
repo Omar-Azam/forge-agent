@@ -20,7 +20,7 @@ jest.mock('../src/config', () => ({
   MAX_OUTPUT_LENGTH: 8000,
   SESSION_DIR      : require('path').join(require('os').tmpdir(), 'dsa-git-session'),
   STRICT_SANDBOX   : false,
-  DEBUG            : false,
+  DEBUG            : process.env.DEBUG === 'true',
 }));
 
 // Helper — run a command in the repo
@@ -60,7 +60,11 @@ afterAll(() => {
   fs.rmSync(REPO, { recursive: true, force: true });
 });
 
-const { executeTool, TOOLS } = require('../src/tools');
+const { executeTool, TOOLS, cache } = require('../src/tools');
+
+beforeEach(() => {
+  cache.clear();
+});
 
 // ─────────────────────────────────────────────
 //  Tool registration

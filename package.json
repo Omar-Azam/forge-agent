@@ -1,11 +1,11 @@
 {
-  "name": "deepseek-browser-agent",
-  "version": "1.1.0",
-  "description": "AI coding agent powered by DeepSeek via browser automation — no API key needed",
+  "name": "@omar-azam/forge-agent",
+  "version": "2.0.0",
+  "description": "Forge Agent — Autonomous AI coding via browser automation. No API key needed.",
   "main": "src/index.js",
   "bin": {
-    "deepseek-agent": "src/index.js",
-    "dsa": "src/index.js"
+    "forge-agent": "src/index.js",
+    "fa": "src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",
@@ -14,7 +14,9 @@
     "calibrate": "node src/calibrate.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
-    "test:coverage": "jest --coverage --runInBand"
+    "test:coverage": "jest --coverage --runInBand",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix"
   },
   "jest": {
     "testEnvironment": "node",
@@ -49,19 +51,23 @@
     "node": ">=18.0.0"
   },
   "keywords": [
+    "forge-agent",
     "ai",
     "agent",
-    "deepseek",
     "browser-automation",
     "coding-agent",
     "cli",
-    "llm"
+    "llm",
+    "autonomous"
   ],
   "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Omar-Azam/forge-agent"
   },
-  "homepage": "https://github.com/yourname/deepseek-browser-agent#readme"
+  "homepage": "https://github.com/Omar-Azam/forge-agent#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

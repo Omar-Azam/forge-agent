@@ -5,12 +5,17 @@ const os   = require('os');
 const path = require('path');
 const { getToolDescriptions } = require('./tools');
 const config = require('./config');
+const { 
+  estimateTokenCount, 
+  shouldCompress, 
+  compressConversation 
+} = require('./compressor');
 
 // ─────────────────────────────────────────────
 //  System prompt — sent as the first message
 // ─────────────────────────────────────────────
 
-function buildSystemPrompt() {
+function buildSystemPrompt(profileName = 'default', profileAddition = '') {
   const toolDocs = getToolDescriptions();
   const cwd      = config.WORKING_DIR;
   const platform = os.platform() + ' ' + os.release();
@@ -25,7 +30,7 @@ function buildSystemPrompt() {
   const FENCE = '```';
 
   const lines = [
-    'You are DeepSeek Agent — an expert AI software engineer and coding assistant',
+    'You are Forge Agent — an expert AI software engineer and coding assistant',
     'running inside a terminal-based agent framework. You have direct access to the',
     "user's filesystem and can execute shell commands.",
     '',
@@ -69,8 +74,10 @@ function buildSystemPrompt() {
     'When fully done, respond with a clear natural language summary.',
     'Do NOT wrap it in any tags or code blocks. Just plain text.',
     '',
-    'CODING GUIDELINES',
-    '─────────────────',
+    'CODING GUIDELINES (CRITICAL)',
+    '────────────────────────────',
+    '- **DEFAULT TECH STACK**: Unless the user explicitly requests a framework (like React, Angular) or a language (like Python), ALWAYS default to vanilla web technologies (HTML, CSS, vanilla JavaScript). Prefer zero-install solutions that can run directly in a browser.',
+    '- **AVOID TRUNCATION**: You are communicating through an interface with a strict output token limit. If you need to write a large file (e.g., more than 150 lines), DO NOT use `write_file` for the entire file at once because your output will be truncated. Instead, use `write_file` to scaffold the basic structure, and then use multiple `append_to_file` tool calls to build the file in safe chunks.',
     '- Always read existing files before modifying them.',
     '- Always check the directory structure before creating new files.',
     '- Write complete, production-quality code — no TODOs, no placeholders.',
@@ -84,17 +91,25 @@ function buildSystemPrompt() {
     'For complex tasks, break them into steps:',
     '1. Explore the codebase / understand context',
     '2. Plan what changes need to be made',
-    '3. Make changes systematically, one file at a time',
+    '3. Make changes systematically, chunking large files to bypass output limits',
     '4. Test / verify the result',
     '',
     'AVAILABLE TOOLS',
     '───────────────',
     toolDocs,
     '',
-    'Remember: You are running autonomously. Be thorough, be precise, and complete',
-    'the task fully. If something is ambiguous, make a sensible decision and note',
-    'it in your final response.',
   ];
+
+  if (profileAddition) {
+    lines.push('=== PROFILE: ' + profileName + ' ===');
+    lines.push(profileAddition);
+    lines.push('==========================');
+    lines.push('');
+  }
+
+  lines.push('Remember: You are running autonomously. Be thorough, be precise, and complete');
+  lines.push('the task fully. If something is ambiguous, make a sensible decision and note');
+  lines.push('it in your final response.');
 
   return lines.join('\n');
 }
@@ -113,8 +128,8 @@ class ConversationManager {
    * Build the very first user message that includes the system prompt,
    * working-directory context, and the user's task.
    */
-  buildFirstMessage(task, workingDirListing) {
-    this._systemPrompt = buildSystemPrompt();
+  buildFirstMessage(task, workingDirListing, profileName = 'default', profileAddition = '') {
+    this._systemPrompt = buildSystemPrompt(profileName, profileAddition);
 
     const dirContext = workingDirListing
       ? '\nCURRENT WORKING DIRECTORY CONTENTS:\n' + workingDirListing + '\n'
@@ -133,6 +148,15 @@ class ConversationManager {
 
     this.messages.push({ role: 'user', content: firstMessage });
     return firstMessage;
+  }
+
+  /**
+   * Prepend memory context to the first user message.
+   */
+  prependMemoryContext(memoryText) {
+    if (this.messages.length > 0 && this.messages[0].role === 'user') {
+        this.messages[0].content = memoryText + '\n\n' + this.messages[0].content;
+    }
   }
 
   /**
@@ -182,6 +206,27 @@ class ConversationManager {
       const header = m.role === 'user' ? 'USER' : 'ASSISTANT';
       return '\n' + '─'.repeat(40) + '\n' + header + '\n' + '─'.repeat(40) + '\n' + m.content;
     }).join('\n');
+  }
+
+  /**
+   * Compress conversation history if needed.
+   */
+  compress(opts = {}) {
+    this.messages = compressConversation(this.messages, opts);
+  }
+
+  /**
+   * Return estimated total token count of all messages.
+   */
+  estimatedTokens() {
+    return this.messages.reduce((sum, msg) => sum + estimateTokenCount(msg.content), 0);
+  }
+
+  /**
+   * Returns true if over threshold.
+   */
+  shouldCompress(threshold) {
+    return shouldCompress(this.messages, threshold);
   }
 }
 

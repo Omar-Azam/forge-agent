@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Templates — Forge Agent</title>
+  <meta name="description" content="Reusable task descriptions for common development workflows in Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Task Templates</h1>
+        <p>Templates are saved, reusable task descriptions for common development workflows. Instead of typing a long prompt every time, you can trigger a template with a single flag.</p>
+
+        <h2 id="built-in-templates">Built-in Templates</h2>
+        <p>Forge Agent includes 10 built-in templates for common setup and maintenance tasks:</p>
+
+        <h3 id="add-typescript">add-typescript</h3>
+        <p>Add TypeScript to an existing JavaScript project. Installs dependencies and configures <code>tsconfig.json</code>.</p>
+        <pre><code>forge-agent --template=add-typescript</code></pre>
+
+        <h3 id="add-jest">add-jest</h3>
+        <p>Set up Jest testing framework from scratch. Creates configuration and example tests.</p>
+        <pre><code>forge-agent --template=add-jest</code></pre>
+
+        <h3 id="add-docker">add-docker</h3>
+        <p>Create a production-ready <code>Dockerfile</code> and <code>docker-compose.yml</code> for the project.</p>
+        <pre><code>forge-agent --template=add-docker</code></pre>
+
+        <h3 id="fix-tests">fix-tests</h3>
+        <p>Run the test suite and autonomously fix any failing tests by editing the source code.</p>
+        <pre><code>forge-agent --template=fix-tests</code></pre>
+
+        <h3 id="code-review">code-review</h3>
+        <p>Review the codebase for security issues, performance bottlenecks, and code quality.</p>
+        <pre><code>forge-agent --template=code-review</code></pre>
+
+        <h2 id="using-templates">Using Templates</h2>
+        <p>Run any template by name using the <code>--template</code> flag:</p>
+        <pre><code>forge-agent --template=add-eslint</code></pre>
+        <p>List all available templates (built-in and custom):</p>
+        <pre><code>forge-agent --list-templates</code></pre>
+        <p>Show full details of a specific template:</p>
+        <pre><code>forge-agent --show-template=add-jest</code></pre>
+
+        <h2 id="creating-custom-templates">Creating Custom Templates</h2>
+        <p>You can save your own tasks as custom templates for future use:</p>
+        <pre><code>forge-agent --save-template=my-setup "Add our standard boilerplate..."</code></pre>
+        <p>Custom templates are stored in <code>~/.deepseek-agent/templates.json</code>.</p>
+
+        <h2 id="template-variables">Template Variables</h2>
+        <p>Templates can use <code>{{variable}}</code> syntax for dynamic substitution. Provide values using the <code>--vars</code> flag as a JSON string:</p>
+        <pre><code># Template: "Create a component named {{name}}"
+forge-agent --template=create-comp --vars='{"name": "MyHeader"}'</code></pre>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

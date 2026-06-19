@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introducing Forge Agent: Autonomous AI Coding with No API Key — Forge Agent Blog</title>
+  <meta name="description" content="Announcing the launch of Forge Agent, a free open-source autonomous AI coding agent.">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="../index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="../getting-started.html" class="nav-link">Installation</a>
+        <a href="../docker.html" class="nav-link">Docker</a>
+        
+        <div class="nav-section">📖 Reference</div>
+        <a href="../cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="index.html" class="nav-link active">📰 Blog</a>
+        
+        <div class="nav-section">💙 Support</div>
+        <a href="../sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="post-meta">
+          <span class="post-date">June 11, 2026</span> • <span class="post-reading-time">5 min read</span>
+          <div class="post-tags">
+            <span class="tag">open-source</span>
+            <span class="tag">ai</span>
+            <span class="tag">nodejs</span>
+            <span class="tag">automation</span>
+          </div>
+        </div>
+
+        <h1>Introducing Forge Agent: Autonomous AI Coding with No API Key</h1>
+
+        <p class="lead">After 48 days of intensive development and over 1150 automated tests, I am thrilled to announce the public launch of <strong>Forge Agent</strong> — the first truly free, autonomous AI coding agent that drives web-based AI assistants without requiring a single API key.</p>
+
+        <h2 id="problem">The Problem: The AI Tax</h2>
+        <p>AI coding tools are transforming how we build software, but they come with a significant barrier: cost. GitHub Copilot, Cursor, and Devin all require monthly subscriptions or expensive pay-per-task API keys. For students, hobbyists, and developers in emerging markets, state-of-the-art AI assistance is often economically out of reach.</p>
+
+        <h2 id="idea">The Idea: Driving the UI</h2>
+        <p>DeepSeek, ChatGPT, and Gemini all provide world-class AI for free via their web interfaces. They are brilliant, but they lack free API access for automation. However, a web browser doesn't care who is clicking the buttons. Forge Agent automates the browser to give you the power of autonomous coding for $0.</p>
+
+        <h2 id="what-it-does">What Forge Agent Does</h2>
+        <p>Forge Agent is a Node.js CLI tool that takes a task in plain English and executes it autonomously. It reads your files, writes new code, runs your test suite, and debugs errors until the job is done.</p>
+        <pre><code>forge-agent "build a REST API with Express and JWT auth"</code></pre>
+        <p>It doesn't just suggest code; it <strong>implements</strong> it. It handles the "boring" parts of development so you can focus on architecture and logic.</p>
+
+        <h2 id="scope">48 Days of Hardening</h2>
+        <p>This isn't a prototype. We've spent 48 days building a robust production-ready tool:</p>
+        <ul>
+          <li><strong>37+ Built-in Tools:</strong> From file I/O and Git to process management and semantic search.</li>
+          <li><strong>1150+ Automated Tests:</strong> Ensuring every tool and parser strategy works across platforms.</li>
+          <li><strong>Multi-Model Support:</strong> Swap between DeepSeek, ChatGPT, and Gemini with a single flag.</li>
+          <li><strong>Enterprise-Ready:</strong> Full Docker support, security sandbox, and audit logging.</li>
+        </ul>
+
+        <h2 id="technical">How It Works (Technical)</h2>
+        <p>Forge Agent uses <strong>Playwright</strong> to drive a headless Chromium instance. It maintains a persistent logged-in session, meaning you log in once and the agent can run indefinitely. AI responses are parsed using a proprietary 6-strategy engine that extracts tool calls from markdown, XML, or even bare JSON. These tools then execute directly on your local filesystem, and the results are fed back into the AI to complete the loop.</p>
+
+        <h2 id="get-started">Getting Started</h2>
+        <p>You can install Forge Agent globally via npm:</p>
+        <pre><code>npm install -g @omar-azam/forge-agent
+forge-agent --setup
+forge-agent "your first task"</code></pre>
+
+        <h2 id="next">What's Next?</h2>
+        <p>We are just getting started. Our <a href="../roadmap.html">2026 Roadmap</a> includes support for local models via Ollama, multi-agent coordination, and a full GUI desktop application. Forge Agent is, and will always be, 100% free and open source.</p>
+
+        <h2 id="conclusion">Join the Journey</h2>
+        <p>If you're tired of paying for API keys just to experiment with AI coding, give Forge Agent a try. Star us on GitHub, join our discussions, and let's build the future of autonomous coding together.</p>
+        
+        <div style="margin-top: 3rem; padding: 2rem; background: var(--surface-color); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <a href="https://github.com/Omar-Azam/forge-agent" class="cta-btn" style="background: var(--accent-color); color: white; padding: 1rem 2rem; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block;">View Forge Agent on GitHub ★</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+  </footer>
+
+  <script src="../../js/nav.js"></script>
+</body>
+</html>

@@ -188,7 +188,12 @@ function readEnvFile(filePath, opts = {}) {
     return { exists: false, path: filePath, vars: [], masked: 0 };
   }
 
-  const content = fs.readFileSync(filePath, 'utf8');
+  let content;
+  try {
+    content = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    return { exists: false, path: filePath, vars: [], masked: 0, error: err.message };
+  }
   const entries = parseEnvFile(content);
   const vars    = [];
   let   masked  = 0;
@@ -239,22 +244,27 @@ function setEnvVar(filePath, key, value, opts = {}) {
   let   action  = 'created';
 
   if (fs.existsSync(filePath)) {
-    const content = fs.readFileSync(filePath, 'utf8');
-    entries = parseEnvFile(content);
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      entries = parseEnvFile(content);
 
-    // Check if key already exists
-    const existing = entries.find(e => e.type === 'var' && e.key === key);
-    if (existing) {
-      existing.value = value;
-      existing.raw   = `${key}=${value.includes(' ') ? `"${value}"` : value}`;
-      action = 'updated';
-    } else {
-      // Append the new var
-      if (comment) {
-        entries.push({ type: 'blank', raw: '' });
-        entries.push({ type: 'comment', raw: `# ${comment}` });
+      // Check if key already exists
+      const existing = entries.find(e => e.type === 'var' && e.key === key);
+      if (existing) {
+        existing.value = value;
+        existing.raw   = `${key}=${value.includes(' ') ? `"${value}"` : value}`;
+        action = 'updated';
+      } else {
+        // Append the new var
+        if (comment) {
+          entries.push({ type: 'blank', raw: '' });
+          entries.push({ type: 'comment', raw: `# ${comment}` });
+        }
+        entries.push({ type: 'var', key, value, raw: `${key}=${value}` });
       }
-      entries.push({ type: 'var', key, value, raw: `${key}=${value}` });
+    } catch {
+      // If read fails, treat as new file
+      entries = [{ type: 'var', key, value, raw: `${key}=${value}` }];
     }
   } else {
     // Create new file
@@ -265,9 +275,12 @@ function setEnvVar(filePath, key, value, opts = {}) {
   }
 
   const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  fs.writeFileSync(filePath, serialiseEnvFile(entries), 'utf8');
+  try {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, serialiseEnvFile(entries), 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to write .env file: ${err.message}`);
+  }
 
   return {
     action,
@@ -286,7 +299,13 @@ function deleteEnvVar(filePath, key) {
     throw new Error(`File not found: ${filePath}`);
   }
 
-  const content = fs.readFileSync(filePath, 'utf8');
+  let content;
+  try {
+    content = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to read .env file: ${err.message}`);
+  }
+
   const entries = parseEnvFile(content);
   const before  = entries.length;
 
@@ -296,7 +315,11 @@ function deleteEnvVar(filePath, key) {
     return { deleted: false, key, message: `Key "${key}" not found in ${filePath}` };
   }
 
-  fs.writeFileSync(filePath, serialiseEnvFile(filtered), 'utf8');
+  try {
+    fs.writeFileSync(filePath, serialiseEnvFile(filtered), 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to update .env file: ${err.message}`);
+  }
   return { deleted: true, key, file: filePath };
 }
 

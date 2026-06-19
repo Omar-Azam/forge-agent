@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// src/calibrate.js — Auto-detect DeepSeek UI selectors and update browser.js
+// src/calibrate.js — Auto-detect AI UI selectors and update browser.js
 'use strict';
 
 const { chromium } = require('playwright');
@@ -7,8 +7,8 @@ const path         = require('path');
 const fs           = require('fs');
 const config       = require('./config');
 
-console.log('\n🔬  DeepSeek Agent — Selector Calibration Tool\n');
-console.log('This tool opens DeepSeek, inspects the DOM, and prints out');
+console.log('\n🔬  Forge Agent — Selector Calibration Tool\n');
+console.log('This tool opens the AI chat, inspects the DOM, and prints out');
 console.log('the selectors that your browser.js should use.\n');
 
 async function calibrate() {
@@ -162,8 +162,8 @@ async function calibrate() {
   }
 
   console.log(sep);
-  console.log('\n📸  Taking screenshot → /tmp/deepseek-calibrate.png');
-  await page.screenshot({ path: '/tmp/deepseek-calibrate.png', fullPage: false });
+  console.log('\n📸  Taking screenshot → /tmp/forge-calibrate.png');
+  await page.screenshot({ path: '/tmp/forge-calibrate.png', fullPage: false });
 
   console.log('\n✅  Calibration complete! Update src/browser.js SEL object with the selectors above.');
   console.log('    Press Ctrl+C to exit.\n');

@@ -42,7 +42,7 @@ jobs:
           CI: 'true'
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -54,7 +54,7 @@ jobs:
             ## Installation
 
             ```bash
-            npm install -g deepseek-browser-agent@${{ github.ref_name }}
+            npm install -g @omar-azam/forge-agent@${{ github.ref_name }}
             ```
 
             See [CHANGELOG.md](./CHANGELOG.md) for what changed in this release.

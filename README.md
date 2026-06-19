@@ -1,317 +1,275 @@
-<div align="center">
+# 🔨 Forge Agent
 
-<img src="https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge" alt="Status: In Development"/>
-<img src="https://img.shields.io/npm/v/deepseek-browser-agent?style=for-the-badge&color=blue" alt="npm version"/>
-<img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen?style=for-the-badge" alt="Node.js"/>
-<img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>
-<img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge" alt="PRs Welcome"/>
+**Autonomous AI Coding Agent — No API Key Needed**
 
-# 🤖 DeepSeek Browser Agent
+Forge Agent drives DeepSeek, ChatGPT, or Gemini through browser
+automation to code, test, and ship software — completely free.
 
-**An autonomous AI coding agent that runs entirely for free — no API key required.**
-
-It drives a real browser to talk to [DeepSeek](https://chat.deepseek.com), giving you a Claude Code / Cursor-style coding agent powered by DeepSeek's models at zero cost.
-
-[Installation](#-installation) · [Quick Start](#-quick-start) · [Usage](#-usage) · [Configuration](#-configuration) · [Tools](#-available-tools) · [Contributing](#-contributing)
+[![npm version](https://img.shields.io/npm/v/@omar-azam/forge-agent)](https://www.npmjs.com/package/@omar-azam/forge-agent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-1300%2B%20passing-brightgreen)](#)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io%2Fomar--azam%2Fforge--agent-blue)](https://github.com/Omar-Azam/forge-agent/pkgs/container/forge-agent)
 
 ---
 
-> ⚠️ **This project is currently in active development.**
-> Core functionality works, but you may encounter rough edges. Bug reports and contributions are very welcome — see [Contributing](#-contributing).
+## 💙 Sponsors
 
-</div>
+Forge Agent is free and open source. If it saves you time:
 
----
-
-## 🧠 How It Works
-
-Most AI coding agents talk to a paid API. This one doesn't.
-
-Instead, it uses **Playwright** to control a real Chromium browser, navigates to `chat.deepseek.com`, sends your task, waits for the response, and parses it to extract tool calls — all automatically. Your local files and terminal are wired up as tools the AI can use, so it can read code, write files, run commands, and build complete projects step by step.
-
-```
-Your Terminal
-     │
-     ▼
- Agent Core          ← orchestrates the loop
-     │
-     ├──► Browser (Playwright)  ← talks to chat.deepseek.com
-     │         │
-     │    DeepSeek AI  ← thinks, decides what tool to use
-     │         │
-     └──► Tool Executor  ← reads/writes files, runs commands
-              │
-         Your Project
-```
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/Omar-Azam)
+[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=ko-fi)](https://ko-fi.com/forgeagent)
 
 ---
 
-## 📦 Installation
+## Why Forge Agent?
+
+- **Free** — No API key. Uses DeepSeek, ChatGPT, or Gemini's free web UI.
+- **Autonomous** — Reads files, writes code, runs tests. Loops until done.
+- **Cross-platform** — Linux, macOS, Windows, and Docker.
+- **50 days built** — 37+ tools, 1300+ tests, full docs, security audited.
+
+---
+
+## Installation
 
 ```bash
-npm install -g deepseek-browser-agent
-```
+# npm (recommended)
+npm install -g @omar-azam/forge-agent
 
-> Chromium downloads automatically after install (~150 MB, one time only).
-
-**Requirements:** Node.js ≥ 18
-
----
-
-## 🚀 Quick Start
-
-**1. First run — log in to DeepSeek:**
-```bash
-deepseek-agent --interactive
-```
-A browser window opens. Log in to your DeepSeek account, then come back to the terminal and press **Enter**. Your session is saved — you only do this once.
-
-**2. Give it a task:**
-```bash
-deepseek-agent "build a REST API in Express with user authentication"
-```
-
-**3. Use the short alias `dsa` from any project folder:**
-```bash
-cd ~/my-project
-dsa "add input validation to all my API routes"
+# Docker (no Node.js required)
+docker pull ghcr.io/omar-azam/forge-agent:latest
 ```
 
 ---
 
-## 💻 Usage
-
-```
-deepseek-agent [OPTIONS] [TASK]
-
-  -t, --task <task>    Task to run (or just type it as the last argument)
-  -i, --interactive    Keep browser open, run multiple tasks in a session
-  -d, --dir <path>     Set working directory (default: current directory)
-  --debug              Print raw AI responses to the terminal
-  --headless           Run browser invisibly (requires prior login)
-  --save-log           Save full session log to ~/.deepseek-agent/logs/
-  --calibrate          Auto-detect DOM selectors (run if agent breaks)
-  -h, --help           Show help
-
-Aliases:
-  dsa                  Short form of deepseek-agent
-```
-
-### Examples
+## Quick Start
 
 ```bash
-# Single task — runs and exits
-deepseek-agent "create a Python script that scrapes Hacker News"
+# First time setup
+forge-agent --setup
 
-# Interactive mode — keeps browser open between tasks
-deepseek-agent --interactive
+# Run a task
+forge-agent "build a REST API with Express and JWT auth"
 
-# Run on a specific project
-dsa --dir ~/projects/my-app "refactor all callbacks to async/await"
+# Interactive mode — multiple tasks, shared context
+forge-agent --interactive
 
-# Debug mode (shows what DeepSeek is actually outputting)
-dsa --debug "build a calculator"
-
-# Headless mode (faster — browser runs in background)
-dsa --headless "write unit tests for utils.js"
-
-# In interactive mode, type 'new' to start a fresh chat:
-❯ Task: new
+# Short alias
+fa "add TypeScript to this project"
 ```
 
 ---
 
-## ⚙️ Configuration
+## Features
 
-### Global config — applies everywhere
-
-Create `~/.deepseek-agent/config.json`:
-
-```json
-{
-  "HEADLESS": true,
-  "MAX_ITERATIONS": 50,
-  "STABLE_DELAY": 3000,
-  "DEBUG": false
-}
-```
-
-### Per-project config — overrides global
-
-Drop `deepseek-agent.config.json` in your project root:
-
-```json
-{
-  "MAX_ITERATIONS": 60,
-  "MAX_OUTPUT_LENGTH": 12000
-}
-```
-
-### All settings
-
-| Setting | Default | Description |
-|---|---|---|
-| `HEADLESS` | `false` | Hide the browser window |
-| `MAX_ITERATIONS` | `40` | Max agent steps per task before stopping |
-| `RESPONSE_TIMEOUT` | `180000` | Max ms to wait for a response (3 min) |
-| `STABLE_DELAY` | `2500` | Ms of silence that means DeepSeek is done |
-| `SEND_DELAY` | `400` | Ms between typing and pressing Enter |
-| `MAX_OUTPUT_LENGTH` | `8000` | Truncate long command outputs sent to AI |
-| `DEBUG` | `false` | Print raw AI responses to terminal |
-| `SESSION_DIR` | `~/.deepseek-agent/session` | Where browser cookies are saved |
-
----
-
-## 🛠️ Available Tools
-
-The agent can use these tools autonomously to complete your task:
-
-| Tool | Description |
+| Feature | Description |
 |---|---|
-| `read_file` | Read a file's contents, optionally by line range |
-| `write_file` | Create or overwrite a file (auto-creates directories) |
-| `append_to_file` | Append text to an existing file |
-| `replace_in_file` | Find and replace text in a file (regex supported) |
-| `delete_file` | Permanently delete a file |
-| `list_directory` | List directory contents, optionally recursive |
-| `create_directory` | Create a directory and all parents |
-| `move_file` | Move or rename a file or directory |
-| `copy_file` | Copy a file to a new location |
-| `get_file_info` | Get file metadata (size, line count, dates) |
-| `run_command` | Execute any shell command |
-| `find_files` | Find files by name pattern (e.g. `*.ts`) |
-| `search_in_files` | Search text inside files (like `grep -r`) |
-| `read_url` | Fetch and read the content of a URL |
-| `write_files` | Write multiple files at once (batch scaffold) |
+| 🌐 Browser Automation | Drives DeepSeek, ChatGPT, Gemini — no API key |
+| 🔧 37+ Built-in Tools | File I/O, git, shell, search, tests, packages, diff, env, processes |
+| 💾 Persistent Memory | Remembers project tech stack and past tasks |
+| 🎭 Agent Profiles | default, backend, frontend, data-science, devops |
+| 📋 Task Templates | 10 built-in templates — add TypeScript, Jest, Docker in one command |
+| 🔄 Session Resume | Continue tasks that stopped halfway |
+| 👁 Watch Mode | Auto re-run on file changes |
+| 🔌 Custom Plugins | Drop a .js file to add any tool |
+| 🔒 Security Sandbox | Blocks SSH keys, credentials, path traversal |
+| 🐳 Docker Ready | Official image, no local Node.js setup needed |
+| ⚡ Smart Caching | Skips repeated read-only tool calls |
+| 🗜 Context Compression | Auto-compresses long conversations |
+| 📊 Benchmarks | Measure and compare performance |
 
 ---
 
-## 📂 Where Data is Stored
+## Built-in Tools (37+)
 
-Everything lives in `~/.deepseek-agent/` in your home directory:
+**File:** read_file · write_file · append_to_file · replace_in_file · delete_file · move_file · copy_file · create_directory · list_directory · get_file_info · write_files
 
-```
-~/.deepseek-agent/
-├── session/        ← Browser cookies (login once, runs forever)
-├── logs/           ← Session logs (only saved with --save-log)
-└── config.json     ← Your global settings
+**Search:** search_in_files · search_codebase · find_files
+
+**Shell:** run_command · start_process · stop_process · list_processes · read_process_logs
+
+**Git:** git_status · git_log · git_diff · git_branches · git_show · git_blame
+
+**Dev:** run_tests · install_package · diff_files · patch_file
+
+**Env:** read_env · set_env_var · delete_env_var · list_env_files · check_env_vars
+
+**System:** take_screenshot · read_clipboard · write_clipboard
+
+---
+
+## Agent Profiles
+
+```bash
+forge-agent --profile=backend      # Node.js, Python, Go, REST APIs
+forge-agent --profile=frontend     # React, Vue, HTML/CSS
+forge-agent --profile=data-science # Python, pandas, ML
+forge-agent --profile=devops       # Docker, CI/CD, shell scripts
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## Task Templates
 
-### Agent responds but creates no files
-The browser DOM rendered the AI's response in a way the parser didn't catch. Run with `--debug` to see exactly what's being received:
 ```bash
-deepseek-agent --debug "build a calculator"
+forge-agent --template=add-typescript    # Add TypeScript to any JS project
+forge-agent --template=add-jest          # Set up Jest testing
+forge-agent --template=add-docker        # Dockerfile + docker-compose
+forge-agent --template=add-github-actions # CI/CD pipeline
+forge-agent --template=fix-tests         # Run and fix all failing tests
+forge-agent --template=code-review       # Comprehensive code review
+forge-agent --list-templates             # See all 10 templates
 ```
 
-### Agent stops responding / loops
-DeepSeek's UI may have changed. Run the calibration tool — it inspects the live DOM and prints updated selectors:
+---
+
+## Session Resume
+
 ```bash
-deepseek-agent --calibrate
+forge-agent --history         # Browse past tasks
+forge-agent --resume          # Pick and resume a past task
+forge-agent --resume=last     # Resume most recent task immediately
+forge-agent --rerun           # Re-run most recent task fresh
 ```
 
-### Login session expired
-Just run without `--headless` — the browser opens and you log in again:
+---
+
+## Docker
+
 ```bash
-deepseek-agent --interactive
+# Single task
+docker run --rm -v "$(pwd):/workspace" --network host \
+  ghcr.io/omar-azam/forge-agent "build a REST API"
+
+# Interactive
+docker run --rm -it -v "$(pwd):/workspace" --network host \
+  ghcr.io/omar-azam/forge-agent --interactive
+
+# With Make
+make run TASK="build a REST API"
+make interactive
 ```
 
-### Chromium didn't download automatically
-```bash
-npx playwright install chromium
+---
+
+## Custom Plugins
+
+```js
+// ~/.deepseek-agent/tools/fetch_weather.js
+module.exports = {
+  name: 'fetch_weather',
+  description: 'Get current weather for a city',
+  parameters: { city: { type: 'string', required: true } },
+  async execute({ city }) {
+    const https = require('https');
+    return new Promise((res, rej) => {
+      https.get(`https://wttr.in/${city}?format=3`, r => {
+        let d = ''; r.on('data', c => d += c); r.on('end', () => res(d));
+      }).on('error', rej);
+    });
+  },
+};
 ```
 
-### Response times out on long tasks
-Increase the timeout in your config:
+```bash
+forge-agent --list-plugins       # see all loaded plugins
+forge-agent --new-plugin my_tool # generate a stub
+```
+
+---
+
+## CLI Reference (key flags)
+
+```
+forge-agent [OPTIONS] [TASK]
+
+Core:      --interactive -i  --dir  --model  --profile  --plan  --think
+Sessions:  --resume  --rerun  --history  --no-memory
+Templates: --template  --list-templates  --save-template
+Output:    --format  --output  --no-tui  --compact
+Watch:     --watch  --watch-pattern  --watch-debounce
+Performance: --max-iterations  --timeout  --no-timeout
+Plugins:   --list-plugins  --new-plugin
+Config:    --setup  --config-path
+Debug:     --debug  --headless  --diagnostics  --security
+Help:      --help  --help=<topic>  --cheatsheet  --man
+```
+
+Full reference: `forge-agent --help` or [docs/cli-reference.html](docs/cli-reference.html)
+
+---
+
+## Configuration
+
 ```json
-{ "RESPONSE_TIMEOUT": 300000, "STABLE_DELAY": 4000 }
+// ~/.deepseek-agent/config.json
+{
+  "MODEL": "deepseek",
+  "MAX_ITERATIONS": 100,
+  "RESPONSE_TIMEOUT": 600000,
+  "ACTIVE_PROFILE": "default",
+  "MEMORY_ENABLED": true,
+  "CACHE_ENABLED": true
+}
 ```
 
----
-
-## 🗂️ Project Structure
-
-```
-deepseek-browser-agent/
-├── src/
-│   ├── index.js          ← CLI entry point and argument parsing
-│   ├── agent.js          ← Core agent loop (send → wait → parse → execute)
-│   ├── browser.js        ← Playwright controller for chat.deepseek.com
-│   ├── tools.js          ← All 15 filesystem and shell tools
-│   ├── parser.js         ← Extracts tool calls from AI responses (6 strategies)
-│   ├── prompt.js         ← System prompt and conversation history manager
-│   ├── config.js         ← Configuration loader (global + per-project)
-│   ├── logger.js         ← ANSI-colored terminal output
-│   ├── calibrate.js      ← DOM selector inspector / auto-fix tool
-│   └── postinstall.js    ← Auto-downloads Chromium after npm install
-├── LICENSE
-├── README.md
-└── package.json
-```
+Run `forge-agent --setup` for guided configuration.
 
 ---
 
-## 🤝 Contributing
+## Key Stats — v2.0.0
 
-Contributions are very welcome — this project is in active development and there's plenty of room to grow.
-
-### Setting up locally
-
-```bash
-git clone https://github.com/Omar-Azam/deepseek-browser-agent
-cd deepseek-browser-agent
-npm install
-npx playwright install chromium
-node src/index.js --interactive
-```
-
-### Areas that need work
-
-- 🧪 **Tests** — there are currently no automated tests; a test suite would be a great contribution
-- 🎨 **UI selector resilience** — DeepSeek updates their UI occasionally; better selector strategies are welcome
-- 🔌 **More tools** — image generation, browser control, database tools, etc.
-- 🌐 **Other AI frontends** — adapting the browser layer to work with other free AI chats
-- 📦 **Windows support** — currently tested on Linux; Windows path handling may need fixes
-- 📝 **Better error messages** — making failures easier to diagnose
-
-### How to contribute
-
-1. Fork the repo
-2. Create a branch: `git checkout -b feature/my-improvement`
-3. Make your changes
-4. Open a Pull Request with a clear description
-
-Please keep PRs focused — one feature or fix per PR makes review much faster.
-
-### Reporting bugs
-
-Open an issue on GitHub with:
-- What you ran
-- What you expected
-- What actually happened
-- Output of `deepseek-agent --debug "your task"` if relevant
+- 🔧 **37+ tools** built in
+- 🧪 **1300+ tests** across 49 suites
+- 📁 **13 docs pages** including full CLI reference
+- 📋 **10 task templates** built in
+- 💡 **10 example projects** in gallery
+- ⚙️ **40+ CLI flags**
+- 🐳 **Docker image** published
+- 🔒 **Security audited** with path sandbox
+- 📦 **50 days** of development
 
 ---
 
-## ⚠️ Disclaimer
+## Documentation
 
-This project automates a web browser to interact with chat.deepseek.com. Automating web UIs may violate the terms of service of the website being automated. Use this tool for **personal and development purposes only**. The authors take no responsibility for account suspensions or other consequences of use.
+Full documentation: [https://omar-azam.github.io/forge-agent](https://omar-azam.github.io/forge-agent)
+
+- [Getting Started](docs/getting-started.html)
+- [All Tools](docs/tools.html)
+- [CLI Reference](docs/cli-reference.html)
+- [Agent Profiles](docs/profiles.html)
+- [Task Templates](docs/templates.html)
+- [Custom Plugins](docs/plugins.html)
+- [Docker Guide](docs/docker.html)
+- [Configuration](docs/configuration.html)
+- [Security](docs/security.html)
+- [Examples Gallery](docs/examples.html)
 
 ---
 
-## 📄 License
+## Contributing
 
-MIT — see [LICENSE](./LICENSE) for details.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup,
+code style, and how to add new tools.
+
+All contributions welcome: new tools, bug fixes, docs improvements,
+new templates, plugin examples.
 
 ---
 
-<div align="center">
+## Support This Project
 
-**Built with Playwright · Powered by DeepSeek · Free forever**
+Forge Agent is free and open source. If it saves you time:
 
-If this project helped you, consider giving it a ⭐ on GitHub!
+- ⭐ **Star the repo** — helps others discover it
+- 💰 **[Sponsor development](https://github.com/sponsors/Omar-Azam)**
+- 📢 **Share it** — post about it, tell your team
+- 🐛 **Report bugs** — good reports make it better
+- 📝 **Improve docs** — any PR helps
 
-</div>
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE)

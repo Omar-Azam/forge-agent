@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started — Forge Agent</title>
+  <meta name="description" content="Installation and quick start guide for Forge Agent.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <button class="hamburger" aria-label="Toggle navigation">☰</button>
+    <a href="index.html" class="logo">🔨 Forge Agent</a>
+    <span class="version-badge">v1.4.0</span>
+    <nav class="header-nav">
+      <input type="text" class="search-input" placeholder="Search docs...">
+      <a href="https://github.com/Omar-Azam/forge-agent" class="github-link">
+        ★ GitHub
+      </a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section">🚀 Getting Started</div>
+        <a href="getting-started.html" class="nav-link">Installation</a>
+        <a href="docker.html" class="nav-link">Docker</a>
+        <a href="getting-started.html#quick-start" class="nav-link">Quick Start</a>
+        <a href="getting-started.html#first-task" class="nav-link">First Task</a>
+        <a href="getting-started.html#setup-wizard" class="nav-link">Setup Wizard</a>
+
+        <div class="nav-section">📖 Reference</div>
+        <a href="cli-reference.html" class="nav-link">CLI Flags</a>
+        <a href="tools.html" class="nav-link">All Tools</a>
+        <a href="blog/index.html" class="nav-link">📰 Blog</a>
+        <a href="configuration.html" class="nav-link">Configuration</a>
+
+        <div class="nav-section">🎭 Features</div>
+        <a href="profiles.html" class="nav-link">Agent Profiles</a>
+        <a href="templates.html" class="nav-link">Task Templates</a>
+        <a href="getting-started.html#watch-mode" class="nav-link">Watch Mode</a>
+        <a href="getting-started.html#resume" class="nav-link">Session Resume</a>
+        <a href="getting-started.html#output" class="nav-link">Output Formats</a>
+        <a href="plugins.html" class="nav-link">Custom Plugins</a>
+
+        <div class="nav-section">🔒 Security & Performance</div>
+        <a href="security.html" class="nav-link">Security Model</a>
+        <a href="benchmarks.html" class="nav-link">Benchmarks</a>
+
+        <div class="nav-section">💡 Examples</div>
+        <a href="examples.html" class="nav-link">Real-World Examples</a>
+
+        <div class="nav-section">💙 Support</div>
+        <a href="sponsor.html" class="nav-link sponsor-link" style="color: #ff79a8;">Sponsor Forge Agent</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <h1>Getting Started</h1>
+        
+        <h2 id="prerequisites">Prerequisites</h2>
+        <ul>
+          <li>Node.js 18 or higher</li>
+          <li>A free account on DeepSeek, ChatGPT, or Gemini</li>
+          <li>npm (comes with Node.js)</li>
+        </ul>
+
+        <h2 id="installation">Installation</h2>
+        <p>Install Forge Agent globally via npm:</p>
+        <pre><code>npm install -g @omar-azam/forge-agent</code></pre>
+        <p>Verify the installation:</p>
+        <pre><code>forge-agent --version   # should print: Forge Agent v1.4.0</code></pre>
+
+        <h2 id="setup-wizard">First Time Setup</h2>
+        <p>Run the interactive setup wizard to configure your preferred AI model and other settings:</p>
+        <pre><code>forge-agent --setup</code></pre>
+        <p>The wizard will guide you through:</p>
+        <ul>
+          <li>Choosing a default model (DeepSeek, ChatGPT, or Gemini)</li>
+          <li>Setting your working directory</li>
+          <li>Configuring headless mode</li>
+          <li>Enabling/disabling persistent memory</li>
+        </ul>
+
+        <h2 id="first-task">Your First Task</h2>
+        <p>Run a single task immediately from the CLI:</p>
+        <pre><code>forge-agent "create a hello world HTML page"</code></pre>
+        <p>Forge Agent will open the browser, send the task to the AI, and begin executing the necessary tool calls to create the file.</p>
+
+        <h2 id="interactive-mode">Interactive Mode</h2>
+        <p>For complex projects, use interactive mode to run multiple tasks with a shared AI context:</p>
+        <pre><code>forge-agent --interactive</code></pre>
+        <ul>
+          <li>Type your tasks one by one.</li>
+          <li>Type <code>new</code> to start a fresh chat session.</li>
+          <li>Type <code>exit</code> or press <code>Ctrl+C</code> to quit.</li>
+        </ul>
+
+        <h2 id="understanding-output">Understanding the Output</h2>
+        <p>Forge Agent uses a structured Terminal UI (TUI) to show progress:</p>
+        <ul>
+          <li><code>⚡ TOOL CALL</code>: The agent is calling a tool (e.g., <code>write_file</code>).</li>
+          <li><code>✓ Result</code>: The tool executed successfully.</li>
+          <li><code>✗ Result</code>: The tool failed (the agent will usually try to fix it).</li>
+          <li><code>Step N/100</code>: Current iteration count.</li>
+        </ul>
+
+        <div class="tip">
+          💡 <strong>Tip:</strong> For slow internet or slow machines, you can increase the response timeout in your config:
+          <pre><code>{ "RESPONSE_TIMEOUT": 900000, "MAX_ITERATIONS": 150 }</code></pre>
+        </div>
+
+        <h2 id="next-steps">Next Steps</h2>
+        <p>Explore the full capabilities of Forge Agent:</p>
+        <ul>
+          <li><a href="cli-reference.html">CLI Reference</a> — See all 40+ flags.</li>
+          <li><a href="profiles.html">Agent Profiles</a> — Optimise for backend, frontend, etc.</li>
+          <li><a href="templates.html">Task Templates</a> — Use pre-defined workflows.</li>
+        </ul>
+      </div>
+    </main>
+
+    <aside class="on-this-page">
+      <h4>On this page</h4>
+      <ul id="page-toc">
+      </ul>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <p>Forge Agent v1.4.0 — MIT License</p>
+    <p>
+      <a href="https://www.npmjs.com/package/@omar-azam/forge-agent">npm</a> ·
+      <a href="https://github.com/Omar-Azam/forge-agent">GitHub</a> ·
+      <a href="cli-reference.html">CLI Reference</a>
+    </p>
+  </footer>
+
+  <script src="js/nav.js"></script>
+</body>
+</html>

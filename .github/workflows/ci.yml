@@ -40,6 +40,11 @@ jobs:
         env:
           SKIP_PLAYWRIGHT_INSTALL: '1'
 
+      # ── Security Audit ─────────────────────────────────────────────────────
+      - name: Security audit
+        run: npm audit --audit-level=high
+        continue-on-error: true   # warn but don't block CI yet
+
       # ── Lint ───────────────────────────────────────────────────────────────
       - name: Check for syntax errors
         run: node --check src/index.js src/agent.js src/browser.js src/tools.js src/parser.js src/prompt.js src/config.js src/logger.js
