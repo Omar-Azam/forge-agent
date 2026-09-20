@@ -151,6 +151,20 @@ class ConversationManager {
   }
 
   /**
+   * Build the subsequent user message for the next task in the same chat.
+   */
+  buildNextMessage(task) {
+    const nextMessage = [
+      'NEXT USER TASK:',
+      '───────────────',
+      task,
+    ].join('\n');
+
+    this.messages.push({ role: 'user', content: nextMessage });
+    return nextMessage;
+  }
+
+  /**
    * Add a tool result as a user-turn message (feeding results back to the AI).
    */
   addToolResult(toolName, result, isError) {

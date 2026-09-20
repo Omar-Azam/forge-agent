@@ -61,18 +61,23 @@ class DeepSeekAgent {
     // ── 1. Snapshot working directory ──────────────────────────────────────
     const dirListing = this._getWorkingDirListing();
 
-    // ── 2. Build and send first message ───────────────────────────────────
+    // ── 2. Build and send task message ────────────────────────────────────
     logger.header(`Task: ${task.slice(0, 80)}${task.length > 80 ? '…' : ''}`);
 
-    const firstMsg = this.conversation.buildFirstMessage(task, dirListing);
+    let msgToSend;
+    if (this.conversation.messages.length === 0) {
+      msgToSend = this.conversation.buildFirstMessage(task, dirListing);
+    } else {
+      msgToSend = this.conversation.buildNextMessage(task);
+    }
 
     if (config.DEBUG) {
-      logger.dim('--- First message (truncated) ---');
-      logger.dim(firstMsg.slice(0, 600) + '...');
+      logger.dim('--- Task message (truncated) ---');
+      logger.dim(msgToSend.slice(0, 600) + '...');
     }
 
     logger.info('Sending task to DeepSeek...');
-    await this.browser.sendMessage(firstMsg);
+    await this.browser.sendMessage(msgToSend);
 
     // ── 3. Agent loop ──────────────────────────────────────────────────────
     for (let iter = 1; iter <= maxIter; iter++) {
@@ -242,11 +247,11 @@ class DeepSeekAgent {
         continue;
       }
 
-      // Reset conversation for each new task
-      this.conversation = new ConversationManager();
-
       try {
-        await this.browser.newChat();
+        // If it's a completely fresh start (e.g. first task in interactive mode)
+        if (this.conversation.messages.length === 0) {
+          await this.browser.newChat();
+        }
         await this.run(task);
       } catch (err) {
         logger.error(`Task failed: ${err.message}`);
