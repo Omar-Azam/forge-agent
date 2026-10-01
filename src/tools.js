@@ -18,6 +18,7 @@ const { startProcess, stopProcess, getProcessStatus, listProcesses, getProcessLo
 const { takeScreenshot } = require('./screenshot');
 const { readClipboard, writeClipboard } = require('./clipboard');
 const { loadAllPlugins } = require('./plugin-loader');
+const logger        = require('./logger');
 const ToolCache = require('./tool-cache');
 const { smartTruncate } = require('./truncator');
 const security = require('./security');

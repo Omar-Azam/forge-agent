@@ -767,6 +767,8 @@ class DeepSeekAgent {
         workingDir: config.WORKING_DIR,
         model: config.MODEL || 'deepseek',
         profile: config.ACTIVE_PROFILE || 'default',
+        role:     process.env.FORGE_ROLE         || null,
+        session:  process.env.FORGE_SESSION_NAME || null,
         status,
         durationMs: Date.now() - startTime,
         stepsCount: progress.toolCallCount,

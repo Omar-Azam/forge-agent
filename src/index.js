@@ -9,9 +9,56 @@ const fs           = require('fs');
 process.stdout.on('error', err => { if (err.code === 'EPIPE') process.exit(0); });
 process.stderr.on('error', err => { if (err.code === 'EPIPE') process.exit(0); });
 
+// ─────────────────────────────────────────────
+//  Instance isolation — must run BEFORE config.js is required.
+//  config.js reads process.env.FORGE_SESSION_DIR at module load.
+// ─────────────────────────────────────────────
+(function parseInstanceArgs() {
+  const argv = process.argv.slice(2);
+
+  const getVal = (names) => {
+    for (const n of names) {
+      for (let i = 0; i < argv.length; i++) {
+        const a = argv[i];
+        if (a === n && argv[i + 1] && !argv[i + 1].startsWith('-')) {
+          return argv[i + 1];
+        }
+        if (a.startsWith(n + '=')) {
+          return a.slice(n.length + 1);
+        }
+      }
+    }
+    return null;
+  };
+
+  const explicitDir = getVal(['--session-dir']);
+  const sessionName = getVal(['--session', '-s']);
+  const roleName    = getVal(['--role']);
+
+  if (explicitDir) {
+    process.env.FORGE_SESSION_DIR  = path.resolve(explicitDir);
+    process.env.FORGE_SESSION_NAME = path.basename(process.env.FORGE_SESSION_DIR);
+  } else if (sessionName) {
+    process.env.FORGE_SESSION_DIR = path.join(
+      require('os').homedir(),
+      '.deepseek-agent',
+      'sessions',
+      sessionName
+    );
+    process.env.FORGE_SESSION_NAME = sessionName;
+  }
+
+  if (roleName) {
+    process.env.FORGE_ROLE = roleName;
+  } else if (process.env.FORGE_SESSION_NAME) {
+    process.env.FORGE_ROLE = process.env.FORGE_SESSION_NAME;
+  }
+})();
+
 const config       = require('./config');
 const logger       = require('./logger');
 const { Errors, displayError } = require('./errors');
+
 
 // ─────────────────────────────────────────────
 //  Unified config application
@@ -93,6 +140,9 @@ function parseArgs(argv) {
     noSponsorNudge: false,
     launchAssets: null,
     testModel: null,
+	session     : null,
+    sessionDir  : null,
+    role        : null,
     };
 
     let i = 0;
@@ -166,6 +216,32 @@ function parseArgs(argv) {
       case '--model':
         opts.model = args[++i];
         break;
+		
+	  case '-s':
+      case '--session':
+        opts.session = args[++i];
+        break;
+
+      case '--session-dir':
+        opts.sessionDir = args[++i];
+        break;
+
+      case '--role':
+        opts.role = args[++i];
+        break;
+
+      case '-s':
+      case '--session':
+        opts.session = args[++i];
+        break;
+
+      case '--session-dir':
+        opts.sessionDir = args[++i];
+        break;
+
+      case '--role':
+        opts.role = args[++i];
+        break;
 
       case '-d':
       case '--dir':
@@ -216,9 +292,21 @@ function parseArgs(argv) {
           opts.format = a.split('=')[1];
         } else if (a && a.startsWith('--output=')) {
           opts.outputFile = a.split('=')[1];
+        } else if (a && a.startsWith('--session=')) {
+          opts.session = a.split('=')[1];
+        } else if (a && a.startsWith('--session-dir=')) {
+          opts.sessionDir = a.split('=')[1];
+        } else if (a && a.startsWith('--role=')) {
+          opts.role = a.split('=')[1];
         } else if (a && a.startsWith('--test-model=')) {
           opts.testModel = a.split('=')[1];
-        } else if (a && !a.startsWith('-')) {
+        } else if (a && a.startsWith('--session=')) {
+          opts.session = a.split('=')[1];
+        } else if (a && a.startsWith('--session-dir=')) {
+          opts.sessionDir = a.split('=')[1];
+        } else if (a && a.startsWith('--role=')) {
+          opts.role = a.split('=')[1];
+		} else if (a && !a.startsWith('-')) {
           opts.task = args.slice(i).join(' ');
           i = args.length;
         }
@@ -273,6 +361,14 @@ ${c('1;36', 'MEMORY & SESSIONS')}
       --history=<N>      Show last N history entries
       --history-stats    Show usage statistics
       --history-search=<term>  Search past tasks
+      --session <name>   Named session (own browser profile, own login).
+                         Enables running multiple agents side-by-side.
+      --session-dir <p>  Explicit session directory (advanced).
+      --role <name>      Role label. Defaults to session name.
+	  --session <name>   Named session (own browser profile, own login).
+				 Enables running multiple agents side-by-side.
+      --session-dir <p>  Explicit session directory (advanced).
+      --role <name>      Role label. Defaults to session name.
       --no-memory        Skip memory for this run
 
 ${c('1;36', 'TEMPLATES & EXAMPLES')}
@@ -949,7 +1045,11 @@ async function main() {
       const { HistoryStore } = require('./history');
       const store = new HistoryStore();
       logger.header('Task History Statistics');
-      console.log(store.formatStats(store.getStats()));
+	  console.log(store.formatStats(store.getStats(
+        config.WORKING_DIR,
+        process.env.FORGE_ROLE || null,
+        process.env.FORGE_SESSION_NAME || null
+      )));
     } catch (e) {
       logger.error('History stats error: ' + e.message);
     }
@@ -991,7 +1091,10 @@ async function main() {
       let selectedEntry = null;
 
       if (args.resume === 'last' || args.rerun === 'last') {
-        selectedEntry = store.getRecent(1)[0];
+		selectedEntry = store.getRecent(1, {
+          role:    process.env.FORGE_ROLE || null,
+          session: process.env.FORGE_SESSION_NAME || null,
+        })[0];
         if (!selectedEntry) {
           logger.warn('No task history found. Run a task first.');
           process.exit(0);
@@ -1004,9 +1107,11 @@ async function main() {
           process.exit(1);
         }
       } else if (args.history || args.historySearch || args.resume === true) {
-        const entries = store.getEntries({ 
+		const entries = store.getEntries({ 
           limit: args.history || 20, 
-          search: args.historySearch 
+          search: args.historySearch,
+          role:    process.env.FORGE_ROLE || null,
+          session: process.env.FORGE_SESSION_NAME || null,
         });
 
         if (entries.length === 0) {
@@ -1046,6 +1151,7 @@ async function main() {
         if (args.rerun) {
           logger.info(`🔄 Re-running: "${selectedEntry.task}"`);
           args.task = selectedEntry.task;
+          args.interactive = false;
         } else {
           if (!process.stdin.isTTY) {
             logger.warn('Non-TTY environment detected. Interactive resume action disabled.');
@@ -1057,6 +1163,7 @@ async function main() {
           if (action === 'rerun') {
             logger.info(`🔄 Re-running: "${task}"`);
             args.task = task;
+            args.interactive = false;
           } else {
             // Action is continue or modify
             args.task = task;
@@ -1344,6 +1451,12 @@ async function main() {
   logger.dim(`Session directory : ${config.SESSION_DIR}`);
   logger.dim(`Model             : ${config.MODEL || 'deepseek'}`);
   logger.dim(`Profile           : ${config.ACTIVE_PROFILE || 'default'}`);
+  if (process.env.FORGE_SESSION_NAME) {
+    logger.dim(`Session name      : ${process.env.FORGE_SESSION_NAME}`);
+  }
+  if (process.env.FORGE_ROLE) {
+    logger.dim(`Role              : ${process.env.FORGE_ROLE}`);
+  }
   if (config.HEADLESS) logger.dim('Browser           : headless mode');
   if (config.DEBUG)    logger.dim('Debug             : ON');
   console.log('');

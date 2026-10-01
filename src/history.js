@@ -74,12 +74,20 @@ class HistoryStore {
     }
   }
 
-  getEntries(opts = {}) {
+    getEntries(opts = {}) {
     const history = this.load();
     let entries = history.entries;
 
     if (opts.workingDir) {
       entries = entries.filter(e => e.workingDir === opts.workingDir);
+    }
+
+    if (opts.role) {
+      entries = entries.filter(e => e.role === opts.role);
+    }
+
+    if (opts.session) {
+      entries = entries.filter(e => e.session === opts.session);
     }
 
     if (opts.status) {
@@ -103,9 +111,18 @@ class HistoryStore {
     return history.entries.find(e => e.id === id) || null;
   }
 
-  getRecent(n = 10) {
+  getRecent(n = 10, opts = {}) {
     const history = this.load();
-    return history.entries.slice(0, n);
+    let entries = history.entries;
+
+    if (opts.role) {
+      entries = entries.filter(e => e.role === opts.role);
+    }
+    if (opts.session) {
+      entries = entries.filter(e => e.session === opts.session);
+    }
+
+    return entries.slice(0, n);
   }
 
   getById(id) {
@@ -157,12 +174,18 @@ class HistoryStore {
     return `[${index + 1}]  ${time.padEnd(12)}  ${icon}  ${truncatedTask}`;
   }
 
-  getStats(workingDir = null) {
+  getStats(workingDir = null, role = null, session = null) {
     const history = this.load();
     let entries = history.entries;
 
     if (workingDir) {
       entries = entries.filter(e => e.workingDir === workingDir);
+    }
+    if (role) {
+      entries = entries.filter(e => e.role === role);
+    }
+    if (session) {
+      entries = entries.filter(e => e.session === session);
     }
 
     const stats = {
@@ -217,6 +240,8 @@ class HistoryStore {
       `  Dir: ${entry.workingDir}`,
       `  Duration: ${duration}  •  ${entry.stepsCount || 0} steps  •  ${entry.filesWritten ? entry.filesWritten.length : 0} files written`,
       `  Model: ${entry.model || 'deepseek'}  •  Profile: ${entry.profile || 'default'}`
+        + (entry.role    ? `  •  Role: ${entry.role}`       : '')
+        + (entry.session ? `  •  Session: ${entry.session}` : '')
     ].join('\n');
   }
 

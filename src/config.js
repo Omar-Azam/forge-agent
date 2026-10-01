@@ -25,7 +25,9 @@ const DEFAULTS = {
 
   // Agent behaviour
   WORKING_DIR        : process.cwd(),
-  SESSION_DIR        : path.join(os.homedir(), '.deepseek-agent', 'session'),
+  SESSION_DIR: process.env.FORGE_SESSION_DIR
+    ? path.resolve(process.env.FORGE_SESSION_DIR)
+    : path.join(os.homedir(), '.deepseek-agent', 'session'),
   STRICT_SANDBOX     : false,
   MAX_OUTPUT_LENGTH  : 8_000,
 

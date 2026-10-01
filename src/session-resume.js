@@ -21,6 +21,8 @@ function buildResumeContext(entry) {
   return [
     '=== RESUMING PREVIOUS SESSION ===',
     `Original task: ${entry.task || '(unknown task)'}`,
+    `Role: ${entry.role || '(unset)'}`,
+    `Session: ${entry.session || '(unset)'}`,
     'Previously completed:',
     `- Files written: ${filesWritten}`,
     `- Commands run: ${commandsRun}`,
@@ -42,6 +44,8 @@ function printResumeHeader(entry, loggerInstance = logger) {
   
   loggerInstance.info('📋 Resuming context from previous session...');
   loggerInstance.dim(`   Original task: ${entry.task}`);
+  if (entry.role)    loggerInstance.dim(`   Role: ${entry.role}`);
+  if (entry.session) loggerInstance.dim(`   Session: ${entry.session}`);
   if (entry.filesWritten && entry.filesWritten.length > 0) {
     loggerInstance.dim(`   Files written: ${entry.filesWritten.join(', ')}`);
   }
