@@ -6,6 +6,13 @@ Versioning: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Cross-platform audio tools** — src/audio.js: platform-agnostic `call_user` (text-to-speech) and `raise_alarm` (audible alert) tools. Auto-selects the best backend per OS — SAPI/PowerShell (Windows), `say`/`afplay` (macOS), `spd-say`/`espeak-ng`/`espeak`/`paplay`/`aplay`/`canberra-gtk-play` (Linux) — with a universal terminal-bell fallback. Honours `FORGE_NO_AUDIO` for CI/headless hosts. Documented in README and docs/tools.html, with dedicated unit tests.
+
+---
+
 ## [2.0.0] — 50-Day Journey Complete
 
 ### Phase 5: Community, Scale & Launch (Days 41–50)

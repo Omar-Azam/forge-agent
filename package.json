@@ -39,7 +39,8 @@
   "files": [
     "src/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "assets/"
   ],
   "dependencies": {
     "playwright": "^1.45.0"

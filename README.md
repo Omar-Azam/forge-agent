@@ -96,6 +96,8 @@ fa "add TypeScript to this project"
 
 **System:** take_screenshot · read_clipboard · write_clipboard
 
+**Audio:** call_user · raise_alarm (cross-platform TTS & alarms — Windows/macOS/Linux, with terminal-bell fallback)
+
 ---
 
 ## Agent Profiles

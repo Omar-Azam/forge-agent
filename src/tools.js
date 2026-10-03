@@ -17,6 +17,7 @@ const { readEnvFile, setEnvVar, deleteEnvVar, findEnvFiles, checkRequiredVars, f
 const { startProcess, stopProcess, getProcessStatus, listProcesses, getProcessLogs, waitForReady, formatProcessList, formatProcessLogs } = require('./process-manager');
 const { takeScreenshot } = require('./screenshot');
 const { readClipboard, writeClipboard } = require('./clipboard');
+const { speak, raiseAlarm } = require('./audio');
 const { loadAllPlugins } = require('./plugin-loader');
 const ToolCache = require('./tool-cache');
 const { smartTruncate } = require('./truncator');
@@ -1265,7 +1266,45 @@ const TOOLS = {
     },
   },
 
-  // ── Write Clipboard ─────────────────────────────────────────────────────────
+  // ── Call User ─────────────────────────────────────────────────────────
+  call_user: {
+    description: 'Uses text-to-speech to speak a configurable sentence out loud. If no message is provided, it defaults to calling the user by their login name to notify them a task is complete. Cross-platform: SAPI (Windows), say (macOS), spd-say/espeak (Linux), with terminal bell fallback.',
+    parameters: {
+      message: { type: 'string', required: false, description: 'The exact sentence to speak. If omitted, it will say "[Name], the task is complete."' },
+    },
+    async execute({ message } = {}) {
+      let text = message;
+      if (!text) {
+        const user = (os.userInfo && os.userInfo().username) || process.env.USER || process.env.USERNAME || 'there';
+        text = user + ', the task is complete.';
+      }
+      try {
+        const backend = speak(text);
+        return '[call_user] Spoke via ' + backend + ': ' + text;
+      } catch (err) {
+        return '[call_user] Text-to-speech failed: ' + err.message + ' | message: ' + text;
+      }
+    },
+  },
+
+  // ── Raise Alarm ───────────────────────────────────────────────────────
+  raise_alarm: {
+    description: 'Plays a continuous beeping alarm sound to alert the user. Useful for indicating a task is complete or requires immediate attention. Cross-platform: SoundPlayer/beep (Windows), afplay (macOS), paplay/aplay/canberra (Linux), with terminal bell fallback.',
+    parameters: {
+      duration: { type: 'number', required: false, description: 'Duration of the alarm in seconds (default is 5).' },
+    },
+    async execute({ duration = 5 } = {}) {
+      try {
+        const backend = raiseAlarm(duration);
+        if (backend === 'disabled') return '[raise_alarm] Audio is disabled (FORGE_NO_AUDIO).';
+        return '[raise_alarm] Alarm played via ' + backend + ' for ' + duration + 's.';
+      } catch (err) {
+        return '[raise_alarm] Alarm failed: ' + err.message;
+      }
+    },
+  },
+
+  // ── Write Clipboard ──────────────────────────────────────────────────────
   write_clipboard: {
     description: 'Write text to the system clipboard.',
     parameters: {

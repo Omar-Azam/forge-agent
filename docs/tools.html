@@ -237,6 +237,41 @@
         <h3 id="write_clipboard">write_clipboard</h3>
         <p>Write text to the system clipboard.</p>
 
+        <h2 id="audio">Audio & Alerts</h2>
+        <p>Both audio tools are fully cross-platform. They pick the best available backend for the host OS and degrade gracefully to a terminal bell when no audio device or helper binary is available. Set <code>FORGE_NO_AUDIO=1</code> to disable all audio (useful for CI / headless environments).</p>
+
+        <h3 id="call_user">call_user</h3>
+        <p>Uses text-to-speech to speak a configurable sentence out loud. If no message is provided, it defaults to calling the user by their login name to notify them a task is complete.</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>message</code></td><td>string</td><td></td><td>The exact sentence to speak. If omitted, it will say &quot;[Name], the task is complete.&quot;</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Backends:</strong> <code>sapi</code> (Windows) &middot; <code>say</code> (macOS) &middot; <code>spd-say</code>, <code>espeak-ng</code>, <code>espeak</code> (Linux) &middot; <code>bell</code> (universal fallback).</p>
+        <pre><code>{
+  "name": "call_user",
+  "args": { "message": "Build finished successfully." }
+}</code></pre>
+
+        <h3 id="raise_alarm">raise_alarm</h3>
+        <p>Plays a continuous beeping alarm sound to alert the user. Useful for indicating a task is complete or requires immediate attention.</p>
+        <table>
+          <thead>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>duration</code></td><td>number</td><td></td><td>Duration of the alarm in seconds (default is 5).</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Backends:</strong> <code>soundplayer</code> (Windows, plays the bundled <code>assets/alarm.wav</code>) &middot; <code>console-beep</code> (Windows fallback) &middot; <code>afplay</code> (macOS) &middot; <code>paplay</code>, <code>aplay</code>, <code>canberra-gtk-play</code> (Linux) &middot; <code>bell</code> (universal fallback).</p>
+        <pre><code>{
+  "name": "raise_alarm",
+  "args": { "duration": 3 }
+}</code></pre>
+
       </div>
     </main>
 
